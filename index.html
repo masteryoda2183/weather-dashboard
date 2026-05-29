@@ -719,41 +719,56 @@ function drawHistChart(tab) {
 // ─── Polymarket ───────────────────────────────────────────────────────────────
 async function loadPolymarkets() {
   document.getElementById('marketsContainer').innerHTML = '<div style="color:var(--text3);font-size:13px;padding:12px 0;">Fetching live markets…</div>';
+
+  // Strict weather keywords — must match to be shown
+  const weatherKw = ['temperature','degrees','°f','°c','high of','low of','heat','heatwave','cold snap','freeze','frost','rainfall','precipitation','inches of rain','snowfall','blizzard','hurricane','typhoon','tornado','wildfire','drought','flood','climate','weather'];
+
+  const isWeather = q => {
+    const lq = q.toLowerCase();
+    return weatherKw.some(kw => lq.includes(kw));
+  };
+
   try {
-    // Search weather markets via Gamma API
-    const url = 'https://gamma-api.polymarket.com/markets?closed=false&archived=false&limit=30&tag_id=53';
-    const markets = await fetchJSON(url);
-
-    if (!markets || markets.length === 0) throw new Error('no results');
-
-    // Filter for temperature/weather keywords
-    const weatherKw = ['temperature','degrees','heat','warm','cold','rain','snow','storm','°','fahrenheit','celsius','high of','low of','weather'];
-    let filtered = markets.filter(m => {
-      const q = (m.question || '').toLowerCase();
-      return weatherKw.some(kw => q.includes(kw));
-    });
-    if (filtered.length === 0) filtered = markets.slice(0, 6);
-
-    polyMarkets = filtered.slice(0, 6);
-    renderMarkets();
-  } catch(e) {
-    // Fallback: try generic search
-    try {
-      const url2 = 'https://gamma-api.polymarket.com/markets?closed=false&archived=false&limit=50';
-      const all = await fetchJSON(url2);
-      const weatherKw = ['temperature','degrees','heat','warm','cold','rain','snow','storm','weather','°'];
-      polyMarkets = all.filter(m => {
-        const q = (m.question || '').toLowerCase();
-        return weatherKw.some(kw => q.includes(kw));
-      }).slice(0, 6);
-      if (polyMarkets.length === 0) throw new Error('none');
+    // Strategy 1: use tag_slug=weather on events endpoint, then flatten markets
+    const eventsUrl = 'https://gamma-api.polymarket.com/events?closed=false&archived=false&limit=20&tag_slug=weather&active=true';
+    const events = await fetchJSON(eventsUrl);
+    if (events && events.length > 0) {
+      const markets = events.flatMap(e => e.markets || []).filter(m => !m.closed && !m.archived);
+      polyMarkets = markets.slice(0, 6);
       renderMarkets();
+      return;
+    }
+    throw new Error('no events');
+  } catch(e1) {
+    try {
+      // Strategy 2: markets endpoint with tag_slug
+      const url2 = 'https://gamma-api.polymarket.com/markets?closed=false&archived=false&limit=50&tag_slug=weather';
+      const markets = await fetchJSON(url2);
+      if (markets && markets.length > 0) {
+        polyMarkets = markets.filter(m => !m.closed).slice(0, 6);
+        renderMarkets();
+        return;
+      }
+      throw new Error('none');
     } catch(e2) {
-      document.getElementById('marketsContainer').innerHTML = `
-        <div style="font-size:13px;color:var(--text2);padding:12px 0;line-height:1.6;">
-          Could not load live markets (CORS restriction from browser).<br>
-          <a href="https://polymarket.com/markets?_c=weather" target="_blank" style="color:var(--accent);">View weather markets directly on Polymarket ↗</a>
-        </div>`;
+      try {
+        // Strategy 3: search by keyword in question field
+        const url3 = 'https://gamma-api.polymarket.com/markets?closed=false&archived=false&limit=100&order=volume&ascending=false';
+        const all = await fetchJSON(url3);
+        const filtered = (all || []).filter(m => isWeather(m.question || ''));
+        if (filtered.length > 0) {
+          polyMarkets = filtered.slice(0, 6);
+          renderMarkets();
+          return;
+        }
+        throw new Error('none after filter');
+      } catch(e3) {
+        document.getElementById('marketsContainer').innerHTML = `
+          <div style="font-size:13px;color:var(--text2);padding:12px 0;line-height:1.6;">
+            No live weather markets found right now — Polymarket may not have active weather markets at this moment.<br><br>
+            <a href="https://polymarket.com/markets?_c=weather" target="_blank" style="color:var(--accent);">Browse weather markets on Polymarket ↗</a>
+          </div>`;
+      }
     }
   }
 }
