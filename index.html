@@ -6,405 +6,580 @@
 <title>Weather Trading Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-  :root {
-    --bg: #f7f7f5;
-    --surface: #ffffff;
-    --surface2: #f1efe8;
-    --border: rgba(0,0,0,0.10);
-    --border2: rgba(0,0,0,0.18);
-    --text: #1a1a18;
-    --text2: #5f5e5a;
-    --text3: #888780;
-    --accent: #1D9E75;
-    --accent-dim: #e1f5ee;
-    --accent-border: #5DCAA5;
-    --up: #3B6D11;
-    --up-bg: #EAF3DE;
-    --down: #A32D2D;
-    --down-bg: #FCEBEB;
-    --warn: #854F0B;
-    --warn-bg: #FAEEDA;
-    --info: #185FA5;
-    --info-bg: #E6F1FB;
-    --radius: 12px;
-    --radius-sm: 8px;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #1a1a18;
-      --surface: #242422;
-      --surface2: #2c2c2a;
-      --border: rgba(255,255,255,0.10);
-      --border2: rgba(255,255,255,0.18);
-      --text: #f0ede6;
-      --text2: #b4b2a9;
-      --text3: #888780;
-      --accent-dim: #04342c;
-      --accent-border: #0f6e56;
-      --up-bg: #173404;
-      --down-bg: #501313;
-      --warn-bg: #412402;
-      --info-bg: #042c53;
-    }
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.5; }
-  a { color: var(--accent); text-decoration: none; }
-  a:hover { text-decoration: underline; }
+:root {
+  --bg:#f7f7f5; --surface:#fff; --surface2:#f1efe8; --surface3:#e8e6df;
+  --border:rgba(0,0,0,.10); --border2:rgba(0,0,0,.18);
+  --text:#1a1a18; --text2:#5f5e5a; --text3:#888780;
+  --accent:#1D9E75; --accent-dim:#e1f5ee; --accent-border:#5DCAA5;
+  --up:#3B6D11; --up-bg:#EAF3DE; --down:#A32D2D; --down-bg:#FCEBEB;
+  --warn:#854F0B; --warn-bg:#FAEEDA; --info:#185FA5; --info-bg:#E6F1FB;
+  --purple:#6B3FA0; --purple-bg:#F0EAF8;
+  --radius:12px; --radius-sm:8px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#1a1a18; --surface:#242422; --surface2:#2c2c2a; --surface3:#363634;
+  --border:rgba(255,255,255,.10); --border2:rgba(255,255,255,.18);
+  --text:#f0ede6; --text2:#b4b2a9; --text3:#888780;
+  --accent-dim:#04342c; --accent-border:#0f6e56;
+  --up-bg:#173404; --down-bg:#501313; --warn-bg:#412402; --info-bg:#042c53; --purple-bg:#2a1040;
+}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.5}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
 
-  /* Layout */
-  .shell { max-width: 1100px; margin: 0 auto; padding: 24px 20px 60px; }
-  .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
-  .logo { font-size: 18px; font-weight: 600; letter-spacing: -0.02em; display: flex; align-items: center; gap: 8px; }
-  .logo-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
-  .topbar-right { display: flex; align-items: center; gap: 10px; }
-  .grid { display: grid; gap: 14px; }
-  .cols-4 { grid-template-columns: repeat(4, 1fr); }
-  .cols-2 { grid-template-columns: repeat(2, 1fr); }
-  .cols-3 { grid-template-columns: repeat(3, 1fr); }
-  @media (max-width: 800px) { .cols-4 { grid-template-columns: repeat(2,1fr); } .cols-2 { grid-template-columns: 1fr; } .cols-3 { grid-template-columns: 1fr; } }
-  @media (max-width: 480px) { .cols-4 { grid-template-columns: 1fr 1fr; } }
+.shell{max-width:1200px;margin:0 auto;padding:20px 18px 60px}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.logo{font-size:17px;font-weight:700;letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
+.logo-dot{width:10px;height:10px;border-radius:50%;background:var(--accent)}
+.topbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 
-  /* Cards */
-  .card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 16px 18px; }
-  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 8px; flex-wrap: wrap; }
-  .card-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text2); display: flex; align-items: center; gap: 6px; }
-  .card-title svg { width: 14px; height: 14px; stroke: var(--text3); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
-  .stat-big { font-size: 30px; font-weight: 600; letter-spacing: -0.03em; line-height: 1; }
-  .stat-sub { font-size: 12px; color: var(--text2); margin-top: 5px; }
-  .section-gap { margin-top: 14px; }
+/* Nav tabs */
+.nav-tabs{display:flex;gap:2px;background:var(--surface2);border-radius:999px;padding:3px;margin-bottom:18px;flex-wrap:wrap}
+.nav-tab{font-size:12px;font-weight:500;padding:6px 16px;border-radius:999px;border:none;background:transparent;color:var(--text2);cursor:pointer;transition:all .15s;white-space:nowrap}
+.nav-tab.active{background:var(--surface);color:var(--text);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
 
-  /* Badges */
-  .badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 999px; white-space: nowrap; }
-  .badge-green { background: var(--up-bg); color: var(--up); }
-  .badge-red { background: var(--down-bg); color: var(--down); }
-  .badge-amber { background: var(--warn-bg); color: var(--warn); }
-  .badge-blue { background: var(--info-bg); color: var(--info); }
-  .badge-teal { background: var(--accent-dim); color: var(--accent); }
-  .badge-neutral { background: var(--surface2); color: var(--text2); }
+.grid{display:grid;gap:12px}
+.cols-4{grid-template-columns:repeat(4,1fr)}
+.cols-3{grid-template-columns:repeat(3,1fr)}
+.cols-2{grid-template-columns:repeat(2,1fr)}
+.cols-12{grid-template-columns:1fr 2fr}
+.cols-21{grid-template-columns:2fr 1fr}
+@media(max-width:900px){.cols-4{grid-template-columns:repeat(2,1fr)}.cols-3{grid-template-columns:repeat(2,1fr)}.cols-2,.cols-12,.cols-21{grid-template-columns:1fr}}
+@media(max-width:500px){.cols-4{grid-template-columns:1fr 1fr}}
 
-  /* Buttons */
-  button { cursor: pointer; font-family: inherit; }
-  .btn { font-size: 13px; padding: 7px 16px; border-radius: 999px; border: 0.5px solid var(--border2); background: transparent; color: var(--text); transition: background 0.15s; }
-  .btn:hover { background: var(--surface2); }
-  .btn.active { background: var(--accent-dim); border-color: var(--accent-border); color: var(--accent); font-weight: 600; }
-  .btn-icon { display: flex; align-items: center; gap: 5px; font-size: 12px; padding: 6px 12px; border-radius: var(--radius-sm); border: 0.5px solid var(--border); background: var(--surface); color: var(--text2); transition: all 0.15s; }
-  .btn-icon:hover { background: var(--surface2); color: var(--text); }
-  .btn-icon svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  .btn-primary { background: var(--accent); color: white; border-color: var(--accent); font-weight: 600; }
-  .btn-primary:hover { background: #169965; }
-  .pill-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.card{background:var(--surface);border:.5px solid var(--border);border-radius:var(--radius);padding:15px 17px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;flex-wrap:wrap}
+.card-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text2);display:flex;align-items:center;gap:6px}
+.card-title svg{width:13px;height:13px;stroke:var(--text3);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.stat-big{font-size:28px;font-weight:700;letter-spacing:-.03em;line-height:1}
+.stat-sub{font-size:12px;color:var(--text2);margin-top:4px}
+.divider{height:.5px;background:var(--border);margin:11px 0}
+.section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:6px}
 
-  /* Source rows */
-  .src-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 0.5px solid var(--border); }
-  .src-row:last-child { border-bottom: none; }
-  .src-name { font-size: 13px; color: var(--text2); display: flex; align-items: center; gap: 8px; }
-  .src-val { font-size: 14px; font-weight: 600; }
-  .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-  .dot-green { background: #3B6D11; }
-  .dot-amber { background: #854F0B; }
-  .dot-red { background: #A32D2D; }
-  .dot-gray { background: var(--text3); }
+.badge{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.badge-green{background:var(--up-bg);color:var(--up)}
+.badge-red{background:var(--down-bg);color:var(--down)}
+.badge-amber{background:var(--warn-bg);color:var(--warn)}
+.badge-blue{background:var(--info-bg);color:var(--info)}
+.badge-teal{background:var(--accent-dim);color:var(--accent)}
+.badge-neutral{background:var(--surface2);color:var(--text2)}
+.badge-purple{background:var(--purple-bg);color:var(--purple)}
 
-  /* Progress bar */
-  .bar-wrap { height: 6px; background: var(--surface2); border-radius: 999px; overflow: hidden; }
-  .bar-inner { height: 100%; border-radius: 999px; transition: width 0.4s ease; }
+button{cursor:pointer;font-family:inherit}
+.btn{font-size:12px;padding:6px 14px;border-radius:999px;border:.5px solid var(--border2);background:transparent;color:var(--text);transition:background .15s}
+.btn:hover{background:var(--surface2)}
+.btn.active{background:var(--accent-dim);border-color:var(--accent-border);color:var(--accent);font-weight:600}
+.btn-icon{display:flex;align-items:center;gap:5px;font-size:12px;padding:6px 12px;border-radius:var(--radius-sm);border:.5px solid var(--border);background:var(--surface);color:var(--text2);transition:all .15s}
+.btn-icon:hover{background:var(--surface2);color:var(--text)}
+.btn-icon svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
+.btn-primary:hover{background:#169965}
+.pill-row{display:flex;gap:6px;flex-wrap:wrap}
 
-  /* Market rows */
-  .mkt-row { padding: 10px 0; border-bottom: 0.5px solid var(--border); display: flex; flex-direction: column; gap: 6px; }
-  .mkt-row:last-child { border-bottom: none; }
-  .mkt-q { font-size: 13px; line-height: 1.4; }
-  .mkt-meta { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.src-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:.5px solid var(--border)}
+.src-row:last-child{border-bottom:none}
+.src-name{font-size:13px;color:var(--text2);display:flex;align-items:center;gap:7px}
+.src-val{font-size:13px;font-weight:600}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.dot-green{background:#3B6D11}.dot-amber{background:#854F0B}.dot-red{background:#A32D2D}.dot-gray{background:var(--text3)}
 
-  /* Edge calc */
-  .range-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-  .range-row label { font-size: 13px; color: var(--text2); width: 120px; flex-shrink: 0; }
-  .range-row input[type=range] { flex: 1; accent-color: var(--accent); }
-  .range-val { font-size: 13px; font-weight: 600; min-width: 44px; text-align: right; }
-  .edge-metric { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; }
-  .divider { height: 0.5px; background: var(--border); margin: 12px 0; }
+.bar-wrap{height:6px;background:var(--surface2);border-radius:999px;overflow:hidden}
+.bar-inner{height:100%;border-radius:999px;transition:width .4s ease}
 
-  /* AI box */
-  .ai-box { background: var(--surface2); border-radius: var(--radius-sm); padding: 13px; font-size: 13px; line-height: 1.65; min-height: 90px; color: var(--text); }
-  .ai-input-row { display: flex; gap: 8px; margin-top: 10px; }
-  .ai-input-row input { flex: 1; font-size: 13px; padding: 8px 12px; border-radius: var(--radius-sm); border: 0.5px solid var(--border2); background: var(--surface); color: var(--text); outline: none; }
-  .ai-input-row input:focus { border-color: var(--accent); }
-  .quick-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
-  .quick-pill { font-size: 11px; padding: 3px 10px; border-radius: 999px; border: 0.5px solid var(--border); background: var(--surface2); color: var(--text2); cursor: pointer; transition: all 0.15s; }
-  .quick-pill:hover { background: var(--surface); color: var(--text); border-color: var(--border2); }
+.mkt-row{padding:9px 0;border-bottom:.5px solid var(--border);display:flex;flex-direction:column;gap:5px}
+.mkt-row:last-child{border-bottom:none}
+.mkt-q{font-size:13px;line-height:1.4}
+.mkt-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 
-  /* Settings modal */
-  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100; align-items: center; justify-content: center; }
-  .modal-bg.open { display: flex; }
-  .modal { background: var(--surface); border-radius: var(--radius); padding: 24px; width: min(480px, 92vw); border: 0.5px solid var(--border2); }
-  .modal h2 { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
-  .modal label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 4px; margin-top: 12px; }
-  .modal input[type=text] { width: 100%; font-size: 13px; padding: 8px 12px; border-radius: var(--radius-sm); border: 0.5px solid var(--border2); background: var(--surface2); color: var(--text); outline: none; }
-  .modal input[type=text]:focus { border-color: var(--accent); }
-  .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
-  .modal-note { font-size: 12px; color: var(--text3); margin-top: 6px; line-height: 1.5; }
+.range-row{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.range-row label{font-size:12px;color:var(--text2);width:115px;flex-shrink:0}
+.range-row input[type=range]{flex:1;accent-color:var(--accent)}
+.range-val{font-size:12px;font-weight:600;min-width:44px;text-align:right}
+.edge-metric{font-size:26px;font-weight:700;letter-spacing:-.02em}
 
-  /* Status bar */
-  .status-bar { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text3); }
-  .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text3); flex-shrink: 0; }
-  .status-dot.live { background: #3B6D11; animation: pulse 2s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+.ai-box{background:var(--surface2);border-radius:var(--radius-sm);padding:12px;font-size:13px;line-height:1.65;min-height:80px;color:var(--text)}
+.ai-input-row{display:flex;gap:8px;margin-top:9px}
+.ai-input-row input{flex:1;font-size:13px;padding:7px 11px;border-radius:var(--radius-sm);border:.5px solid var(--border2);background:var(--surface);color:var(--text);outline:none}
+.ai-input-row input:focus{border-color:var(--accent)}
+.quick-pills{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+.quick-pill{font-size:11px;padding:3px 9px;border-radius:999px;border:.5px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;transition:all .15s}
+.quick-pill:hover{background:var(--surface);color:var(--text)}
 
-  /* Loading shimmer */
-  .shimmer { background: linear-gradient(90deg, var(--surface2) 25%, var(--border) 50%, var(--surface2) 75%); background-size: 200% 100%; animation: shimmer 1.4s infinite; border-radius: 4px; color: transparent; }
-  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+.tab-row{display:flex;gap:4px}
+.tab{font-size:11px;padding:4px 11px;border-radius:999px;border:.5px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;transition:all .15s}
+.tab.active{background:var(--surface2);color:var(--text);border-color:var(--border2);font-weight:600}
 
-  /* Chart tabs */
-  .tab-row { display: flex; gap: 4px; }
-  .tab { font-size: 12px; padding: 4px 12px; border-radius: 999px; border: 0.5px solid var(--border); background: transparent; color: var(--text2); cursor: pointer; transition: all 0.15s; }
-  .tab.active { background: var(--surface2); color: var(--text); border-color: var(--border2); font-weight: 600; }
+.status-bar{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--text3)}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--text3);flex-shrink:0}
+.status-dot.live{background:#3B6D11;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 
-  /* Footer */
-  .footer { margin-top: 40px; text-align: center; font-size: 12px; color: var(--text3); }
+.shimmer{background:linear-gradient(90deg,var(--surface2) 25%,var(--border) 50%,var(--surface2) 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:4px;color:transparent}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
-  /* Highlight card top border */
-  .accent-top { border-top: 2px solid var(--accent); }
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--surface);border-radius:var(--radius);padding:22px;width:min(500px,94vw);border:.5px solid var(--border2);max-height:90vh;overflow-y:auto}
+.modal h2{font-size:15px;font-weight:600;margin-bottom:14px}
+.modal label{display:block;font-size:12px;color:var(--text2);margin-bottom:4px;margin-top:11px}
+.modal input[type=text]{width:100%;font-size:13px;padding:7px 11px;border-radius:var(--radius-sm);border:.5px solid var(--border2);background:var(--surface2);color:var(--text);outline:none}
+.modal input[type=text]:focus{border-color:var(--accent)}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
+.modal-note{font-size:11px;color:var(--text3);margin-top:4px;line-height:1.5}
+
+/* Station profile */
+.trait-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:.5px solid var(--border)}
+.trait-row:last-child{border-bottom:none}
+.trait-label{font-size:12px;color:var(--text2);flex:1}
+.trait-val{font-size:12px;font-weight:600;text-align:right}
+.trait-bar-wrap{width:80px;height:5px;background:var(--surface2);border-radius:999px;overflow:hidden}
+.trait-bar{height:100%;border-radius:999px}
+
+/* Intraday curve */
+.intraday-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:8px}
+.hour-cell{background:var(--surface2);border-radius:var(--radius-sm);padding:8px 4px;text-align:center}
+.hour-label{font-size:10px;color:var(--text3)}
+.hour-temp{font-size:14px;font-weight:600;margin:3px 0}
+.hour-delta{font-size:10px}
+
+/* Microstructure */
+.prob-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:.5px solid var(--border)}
+.prob-row:last-child{border-bottom:none}
+.prob-label{font-size:12px;color:var(--text2);width:60px;flex-shrink:0}
+.prob-bar-wrap{flex:1;height:10px;background:var(--surface2);border-radius:999px;overflow:hidden;position:relative}
+.prob-bar-fill{height:100%;border-radius:999px;transition:width .4s}
+.prob-pct{font-size:12px;font-weight:600;min-width:36px;text-align:right}
+.arb-alert{background:var(--warn-bg);border:.5px solid var(--warn);border-radius:var(--radius-sm);padding:10px 13px;font-size:12px;color:var(--warn);margin-top:10px;line-height:1.5;display:none}
+
+/* Velocity */
+.vel-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:.5px solid var(--border)}
+.vel-row:last-child{border-bottom:none}
+.vel-time{font-size:12px;color:var(--text3);width:55px}
+.vel-temp{font-size:13px;font-weight:600}
+.vel-delta{font-size:12px;font-weight:600;min-width:50px;text-align:right}
+
+.footer{margin-top:36px;text-align:center;font-size:11px;color:var(--text3)}
+.accent-top{border-top:2px solid var(--accent)}
+
+/* Whale alert */
+.whale-alert{background:var(--purple-bg);border:.5px solid var(--purple);border-radius:var(--radius-sm);padding:9px 13px;font-size:12px;color:var(--purple);margin-top:8px;display:none}
 </style>
 </head>
 <body>
-
 <div class="shell">
 
-  <!-- Top bar -->
-  <div class="topbar">
-    <div class="logo">
-      <div class="logo-dot"></div>
-      Weather Trading Dashboard
+<!-- Topbar -->
+<div class="topbar">
+  <div class="logo"><div class="logo-dot"></div>Weather Trading Dashboard</div>
+  <div class="topbar-right">
+    <div class="status-bar">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText">Loading…</span>
     </div>
-    <div class="topbar-right">
-      <div class="status-bar">
-        <div class="status-dot" id="statusDot"></div>
-        <span id="statusText">Loading…</span>
-      </div>
-      <button class="btn-icon" onclick="refreshAll()">
-        <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-        Refresh
-      </button>
-      <button class="btn-icon" onclick="openSettings()">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        API Keys
-      </button>
-    </div>
+    <button class="btn-icon" onclick="refreshAll()">
+      <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>Refresh
+    </button>
+    <button class="btn-icon" onclick="openSettings()">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06-.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>API Keys
+    </button>
   </div>
+</div>
 
-  <!-- City selector -->
-  <div class="pill-row" style="margin-bottom:16px;" id="cityBtns">
-    <button class="btn active" onclick="selectCity(this,'New York',40.7128,-74.0060)">New York</button>
-    <button class="btn" onclick="selectCity(this,'Los Angeles',34.0522,-118.2437)">Los Angeles</button>
-    <button class="btn" onclick="selectCity(this,'Chicago',41.8781,-87.6298)">Chicago</button>
-    <button class="btn" onclick="selectCity(this,'Miami',25.7617,-80.1918)">Miami</button>
-    <button class="btn" onclick="selectCity(this,'London',51.5074,-0.1278)">London</button>
-    <button class="btn" onclick="selectCity(this,'São Paulo',-23.5505,-46.6333)">São Paulo</button>
-  </div>
+<!-- City selector -->
+<div class="pill-row" style="margin-bottom:14px" id="cityBtns">
+  <button class="btn active" onclick="selectCity(this,'New York',40.7128,-74.0060,'KJFK','New York JFK')">New York</button>
+  <button class="btn" onclick="selectCity(this,'Los Angeles',34.0522,-118.2437,'KLAX','Los Angeles LAX')">Los Angeles</button>
+  <button class="btn" onclick="selectCity(this,'Chicago',41.8781,-87.6298,'KORD','Chicago O\'Hare')">Chicago</button>
+  <button class="btn" onclick="selectCity(this,'Miami',25.7617,-80.1918,'KMIA','Miami Intl')">Miami</button>
+  <button class="btn" onclick="selectCity(this,'London',51.5074,-0.1278,'EGLL','London Heathrow')">London</button>
+  <button class="btn" onclick="selectCity(this,'São Paulo',-23.5505,-46.6333,'SBGR','São Paulo Guarulhos')">São Paulo</button>
+</div>
 
-  <!-- Stat cards -->
-  <div class="grid cols-4" style="margin-bottom:14px;">
+<!-- Nav tabs -->
+<div class="nav-tabs">
+  <button class="nav-tab active" onclick="showPanel('overview')">📊 Overview</button>
+  <button class="nav-tab" onclick="showPanel('station')">📍 Station Profile</button>
+  <button class="nav-tab" onclick="showPanel('intraday')">⚡ Intraday Engine</button>
+  <button class="nav-tab" onclick="showPanel('microstructure')">🔬 Microstructure</button>
+  <button class="nav-tab" onclick="showPanel('velocity')">🚀 Forecast Velocity</button>
+  <button class="nav-tab" onclick="showPanel('edge')">🎯 Edge & AI</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ OVERVIEW -->
+<div class="tab-panel active" id="panel-overview">
+  <div class="grid cols-4" style="margin-bottom:12px">
     <div class="card accent-top">
-      <div class="card-title">
-        <svg viewBox="0 0 24 24"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
-        Consensus temp
-      </div>
+      <div class="card-title"><svg viewBox="0 0 24 24"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>Consensus temp</div>
       <div class="stat-big" id="statConsensus">—</div>
-      <div class="stat-sub" id="statConsensusSub">Loading sources…</div>
+      <div class="stat-sub" id="statConsensusSub">Loading…</div>
     </div>
     <div class="card">
-      <div class="card-title">
-        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        30-yr historical avg
-      </div>
+      <div class="card-title"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Historical avg</div>
       <div class="stat-big" id="statHistAvg">—</div>
-      <div class="stat-sub" id="statAnomaly">Loading history…</div>
+      <div class="stat-sub" id="statAnomaly">Loading…</div>
     </div>
     <div class="card">
-      <div class="card-title">
-        <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-        Percentile rank
-      </div>
+      <div class="card-title"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Percentile rank</div>
       <div class="stat-big" id="statPercentile">—</div>
       <div class="stat-sub" id="statPercentileSub">Loading…</div>
     </div>
     <div class="card">
-      <div class="card-title">
-        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        Source spread
-      </div>
+      <div class="card-title"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Source spread</div>
       <div class="stat-big" id="statSpread">—</div>
-      <div class="stat-sub" id="statSpreadSub">Across all live sources</div>
+      <div class="stat-sub" id="statSpreadSub">Across live sources</div>
     </div>
   </div>
 
-  <!-- Sources + Markets -->
-  <div class="grid cols-2" style="margin-bottom:14px;">
-
-    <!-- Temperature sources -->
+  <div class="grid cols-2" style="margin-bottom:12px">
+    <!-- Live sources -->
     <div class="card">
       <div class="card-header">
-        <span class="card-title">
-          <svg viewBox="0 0 24 24"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z"/></svg>
-          Live temperature sources
-        </span>
-        <span class="badge badge-teal" id="srcSpreadBadge">loading…</span>
+        <span class="card-title"><svg viewBox="0 0 24 24"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9z"/></svg>Live temperature sources</span>
+        <span class="badge badge-teal" id="srcSpreadBadge">—</span>
       </div>
       <div id="sourcesContainer">
-        <div class="src-row"><span class="src-name"><span class="dot dot-gray"></span>Open-Meteo (GFS)</span><span class="src-val shimmer">——</span></div>
-        <div class="src-row"><span class="src-name"><span class="dot dot-gray"></span>ECMWF (wttr.in)</span><span class="src-val shimmer">——</span></div>
-        <div class="src-row"><span class="src-name"><span class="dot dot-gray"></span>Open-Meteo ICON</span><span class="src-val shimmer">——</span></div>
-        <div class="src-row"><span class="src-name"><span class="dot dot-gray"></span>Visual Crossing</span><span class="src-val shimmer">——</span></div>
-        <div class="src-row"><span class="src-name"><span class="dot dot-gray"></span>AccuWeather</span><span class="src-val" id="awVal" style="color:var(--text3);font-size:12px;">needs key</span></div>
+        <div class="src-row"><span class="src-name"><span class="dot dot-gray"></span>Open-Meteo (GFS)</span><span class="src-val shimmer" style="width:44px;display:inline-block">&nbsp;</span></div>
+        <div class="src-row"><span class="src-name"><span class="dot dot-gray"></span>ECMWF (IFS)</span><span class="src-val shimmer" style="width:44px;display:inline-block">&nbsp;</span></div>
+        <div class="src-row"><span class="src-name"><span class="dot dot-gray"></span>Open-Meteo (ICON)</span><span class="src-val shimmer" style="width:44px;display:inline-block">&nbsp;</span></div>
+        <div class="src-row"><span class="src-name"><span class="dot dot-gray"></span>Visual Crossing</span><span class="src-val" style="font-size:12px;color:var(--text3)">add key ↗</span></div>
+        <div class="src-row"><span class="src-name"><span class="dot dot-gray"></span>AccuWeather</span><span class="src-val" style="font-size:12px;color:var(--text3)">add key ↗</span></div>
       </div>
       <div class="divider"></div>
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--text3);">Model agreement</span>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span class="section-label">Model agreement</span>
         <span class="badge" id="agreeBadge">—</span>
       </div>
-      <div class="bar-wrap" style="margin-top:7px;">
-        <div class="bar-inner" id="agreeBar" style="background:var(--accent);width:0%;"></div>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:4px;"><span>Diverging</span><span>Strong consensus</span></div>
+      <div class="bar-wrap" style="margin-top:6px"><div class="bar-inner" id="agreeBar" style="background:var(--accent);width:0%"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:4px"><span>Diverging</span><span>Strong consensus</span></div>
     </div>
 
-    <!-- Polymarket markets -->
+    <!-- Polymarket -->
     <div class="card">
       <div class="card-header">
-        <span class="card-title">
-          <svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-          Polymarket weather markets
-        </span>
-        <a href="https://polymarket.com/markets?_c=weather" target="_blank" class="badge badge-blue" style="text-decoration:none;">Live ↗</a>
+        <span class="card-title"><svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>Polymarket weather markets</span>
+        <a href="https://polymarket.com/markets?_c=weather" target="_blank" class="badge badge-blue" style="text-decoration:none">Live ↗</a>
       </div>
-      <div id="marketsContainer">
-        <div style="color:var(--text3);font-size:13px;padding:12px 0;">Fetching live markets…</div>
-      </div>
+      <div id="marketsContainer"><div style="color:var(--text3);font-size:13px;padding:10px 0">Fetching…</div></div>
     </div>
   </div>
 
   <!-- Historical chart -->
-  <div class="card" style="margin-bottom:14px;">
+  <div class="card">
     <div class="card-header">
-      <span class="card-title">
-        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        Historical climate data — <span id="chartCityLabel">—</span> · <span id="chartMonthLabel">—</span>
-      </span>
+      <span class="card-title"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Historical climate — <span id="chartCityLabel">—</span> · <span id="chartMonthLabel">—</span></span>
       <div class="tab-row">
         <button class="tab active" onclick="setHistTab(this,'dist')">Distribution</button>
         <button class="tab" onclick="setHistTab(this,'trend')">10-yr trend</button>
         <button class="tab" onclick="setHistTab(this,'extremes')">Extremes</button>
       </div>
     </div>
-    <div style="position:relative;width:100%;height:220px;">
-      <canvas id="histChart" role="img" aria-label="Historical temperature chart">Historical temperature data.</canvas>
+    <div style="position:relative;width:100%;height:200px"><canvas id="histChart"></canvas></div>
+    <div id="chartAxisLabels" style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:4px"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ STATION PROFILE -->
+<div class="tab-panel" id="panel-station">
+  <div class="grid cols-2" style="margin-bottom:12px">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Station personality — <span id="stationName">—</span></span>
+        <span class="badge badge-purple" id="stationCode">—</span>
+      </div>
+      <div id="stationTraits">
+        <div class="trait-row"><span class="trait-label">Systematic forecast bias</span><span class="trait-val" id="traitBias">—</span></div>
+        <div class="trait-row"><span class="trait-label">Afternoon overshoot frequency</span><span class="trait-val" id="traitOvershoot">—</span></div>
+        <div class="trait-row"><span class="trait-label">Marine layer suppression risk</span><span class="trait-val" id="traitMarine">—</span></div>
+        <div class="trait-row"><span class="trait-label">Late-day revision frequency</span><span class="trait-val" id="traitRevision">—</span></div>
+        <div class="trait-row"><span class="trait-label">Urban heat island effect</span><span class="trait-val" id="traitUHI">—</span></div>
+        <div class="trait-row"><span class="trait-label">Wind suppression sensitivity</span><span class="trait-val" id="traitWind">—</span></div>
+      </div>
     </div>
-    <div id="chartAxisLabels" style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:5px;"></div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Resolution source intel</span>
+        <span class="badge badge-amber">Critical</span>
+      </div>
+      <div id="resolutionInfo">
+        <div class="src-row"><span class="src-name">Resolution station</span><span class="src-val" id="resStation">—</span></div>
+        <div class="src-row"><span class="src-name">Data source</span><span class="src-val" id="resSource">—</span></div>
+        <div class="src-row"><span class="src-name">Rounding behavior</span><span class="src-val" id="resRounding">—</span></div>
+        <div class="src-row"><span class="src-name">Typical update time</span><span class="src-val" id="resUpdateTime">—</span></div>
+        <div class="src-row"><span class="src-name">Revision frequency</span><span class="src-val" id="resRevFreq">—</span></div>
+        <div class="src-row"><span class="src-name">Station vs model avg delta</span><span class="src-val" id="resDelta">—</span></div>
+      </div>
+      <div class="divider"></div>
+      <div class="section-label">Station edge note</div>
+      <div id="stationEdgeNote" style="font-size:12px;color:var(--text2);line-height:1.6;margin-top:4px">—</div>
+    </div>
   </div>
 
-  <!-- Edge calculator + AI -->
-  <div class="grid cols-2">
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Hourly heating pattern — typical day profile for <span id="stationHeatLabel">—</span></span>
+      <span class="badge badge-teal" id="heatPatternBadge">—</span>
+    </div>
+    <div style="position:relative;width:100%;height:180px"><canvas id="heatingChart"></canvas></div>
+    <div style="font-size:11px;color:var(--text3);margin-top:6px;line-height:1.5" id="heatingNote">—</div>
+  </div>
+</div>
 
+<!-- ═══════════════════════════════════════════════════════ INTRADAY ENGINE -->
+<div class="tab-panel" id="panel-intraday">
+  <div class="grid cols-2" style="margin-bottom:12px">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Intraday momentum engine</span>
+        <span class="badge badge-teal" id="momentumBadge">—</span>
+      </div>
+      <div class="grid cols-3" style="gap:8px;margin-bottom:12px">
+        <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:10px;text-align:center">
+          <div class="section-label">Current est.</div>
+          <div style="font-size:22px;font-weight:700" id="idCurrentTemp">—</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:10px;text-align:center">
+          <div class="section-label">Expected max</div>
+          <div style="font-size:22px;font-weight:700" id="idExpectedMax">—</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:10px;text-align:center">
+          <div class="section-label">Remaining △</div>
+          <div style="font-size:22px;font-weight:700" id="idRemaining">—</div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="section-label">Hour-by-hour remaining warming probability</div>
+      <div id="heatHours" style="margin-top:8px"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><svg viewBox="0 0 24 24"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4z"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>Momentum factors</span>
+      </div>
+      <div id="momentumFactors">
+        <div class="trait-row">
+          <span class="trait-label">Heating rate (last 2h)</span>
+          <span class="trait-val" id="mfHeatingRate">—</span>
+        </div>
+        <div class="trait-row">
+          <span class="trait-label">Solar angle remaining</span>
+          <span class="trait-val" id="mfSolarAngle">—</span>
+        </div>
+        <div class="trait-row">
+          <span class="trait-label">Humidity suppression</span>
+          <span class="trait-val" id="mfHumidity">—</span>
+        </div>
+        <div class="trait-row">
+          <span class="trait-label">Cloud cover impact</span>
+          <span class="trait-val" id="mfCloud">—</span>
+        </div>
+        <div class="trait-row">
+          <span class="trait-label">Wind suppression</span>
+          <span class="trait-val" id="mfWind">—</span>
+        </div>
+        <div class="trait-row">
+          <span class="trait-label">Momentum decay estimate</span>
+          <span class="trait-val" id="mfDecay">—</span>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="section-label">Scalping signal</div>
+      <div id="scalpSignal" style="margin-top:6px">
+        <span class="badge badge-neutral" style="font-size:12px;padding:4px 12px" id="scalpBadge">Loading…</span>
+        <div style="font-size:12px;color:var(--text3);margin-top:5px" id="scalpNote">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Live heating curve — today vs typical profile</span>
+      <span class="badge badge-blue" id="curveTimeBadge">—</span>
+    </div>
+    <div style="position:relative;width:100%;height:200px"><canvas id="intradayChart"></canvas></div>
+    <div style="font-size:11px;color:var(--text3);margin-top:5px" id="intradayNote">Gray = typical profile · Teal = today's observed · Dashed = model forecast</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ MICROSTRUCTURE -->
+<div class="tab-panel" id="panel-microstructure">
+  <div class="grid cols-2" style="margin-bottom:12px">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><svg viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 1 17"/><polyline points="16 7 22 7 22 13"/></svg>Temperature bin probability curve</span>
+        <span class="badge badge-purple" id="arbBadge">Checking…</span>
+      </div>
+      <div id="probCurve" style="margin-bottom:8px"></div>
+      <div class="arb-alert" id="arbAlert">
+        ⚡ <strong>Arbitrage opportunity detected:</strong> <span id="arbAlertText"></span>
+      </div>
+      <div class="divider"></div>
+      <div class="section-label">Implied probability analysis</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.6;margin-top:4px" id="probAnalysis">Enter market prices above to detect mispricing between adjacent temperature bins.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Market microstructure</span>
+        <span class="badge badge-amber">Live signals</span>
+      </div>
+      <div class="src-row"><span class="src-name">Liquidity depth (est.)</span><span class="src-val" id="msLiquidity">—</span></div>
+      <div class="src-row"><span class="src-name">Bid-ask spread</span><span class="src-val" id="msSpread">—</span></div>
+      <div class="src-row"><span class="src-name">Stale price signal</span><span class="src-val" id="msStale">—</span></div>
+      <div class="src-row"><span class="src-name">Recent large trades</span><span class="src-val" id="msWhale">—</span></div>
+      <div class="src-row"><span class="src-name">Volume 24h</span><span class="src-val" id="msVolume">—</span></div>
+      <div class="src-row"><span class="src-name">Price momentum (1h)</span><span class="src-val" id="msMomentum">—</span></div>
+      <div class="whale-alert" id="whaleAlert">🐋 <strong>Whale activity detected:</strong> <span id="whaleAlertText"></span></div>
+      <div class="divider"></div>
+      <div class="section-label">Manual bin price entry (for arb detection)</div>
+      <div id="binInputs" style="margin-top:6px"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Probability curve visualizer</span>
+      <span class="badge badge-blue">Smooth = fair · Spiky = opportunity</span>
+    </div>
+    <div style="position:relative;width:100%;height:180px"><canvas id="microChart"></canvas></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ VELOCITY -->
+<div class="tab-panel" id="panel-velocity">
+  <div class="grid cols-2" style="margin-bottom:12px">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>Forecast update velocity</span>
+        <span class="badge" id="velBadge">—</span>
+      </div>
+      <div id="velocityRows"><div style="color:var(--text3);font-size:13px;padding:8px 0">Loading snapshots…</div></div>
+      <div class="divider"></div>
+      <div class="grid cols-3" style="gap:8px;margin-top:4px">
+        <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:10px;text-align:center">
+          <div class="section-label">Velocity</div>
+          <div style="font-size:20px;font-weight:700" id="velRate">—</div>
+          <div style="font-size:11px;color:var(--text3)">°C/hr</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:10px;text-align:center">
+          <div class="section-label">Acceleration</div>
+          <div style="font-size:20px;font-weight:700" id="velAccel">—</div>
+          <div style="font-size:11px;color:var(--text3)">trend</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:10px;text-align:center">
+          <div class="section-label">Confidence</div>
+          <div style="font-size:20px;font-weight:700" id="velConf">—</div>
+          <div style="font-size:11px;color:var(--text3)">converging?</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Velocity signals</span>
+      </div>
+      <div id="velSignals">
+        <div class="trait-row"><span class="trait-label">Revision direction</span><span class="trait-val" id="vsDirection">—</span></div>
+        <div class="trait-row"><span class="trait-label">Repricing lag opportunity</span><span class="trait-val" id="vsLag">—</span></div>
+        <div class="trait-row"><span class="trait-label">Model convergence</span><span class="trait-val" id="vsConvergence">—</span></div>
+        <div class="trait-row"><span class="trait-label">Forecast locked in?</span><span class="trait-val" id="vsLocked">—</span></div>
+        <div class="trait-row"><span class="trait-label">Alert threshold</span><span class="trait-val" id="vsAlert">—</span></div>
+      </div>
+      <div class="divider"></div>
+      <div class="section-label">Action signal</div>
+      <div id="velAction" style="margin-top:6px">
+        <span class="badge badge-neutral" style="font-size:12px;padding:4px 12px" id="velActionBadge">Loading…</span>
+        <div style="font-size:12px;color:var(--text3);margin-top:5px" id="velActionNote">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Forecast trajectory — revision history today</span>
+    </div>
+    <div style="position:relative;width:100%;height:180px"><canvas id="velocityChart"></canvas></div>
+    <div style="font-size:11px;color:var(--text3);margin-top:5px">Each point = a forecast snapshot. Slope = velocity. Flattening = convergence (market should price in).</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ EDGE & AI -->
+<div class="tab-panel" id="panel-edge">
+  <div class="grid cols-2" style="margin-bottom:12px">
     <!-- Edge calculator -->
     <div class="card">
       <div class="card-header">
-        <span class="card-title">
-          <svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
-          Edge calculator
-        </span>
+        <span class="card-title"><svg viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>Edge calculator</span>
         <span class="badge badge-teal">Kelly + EV</span>
       </div>
-      <div class="range-row">
-        <label>Your YES prob.</label>
-        <input type="range" min="1" max="99" value="55" step="1" id="myProb" oninput="calcEdge()">
-        <span class="range-val" id="myProbVal">55%</span>
+      <div class="range-row"><label>Your YES prob.</label><input type="range" min="1" max="99" value="55" step="1" id="myProb" oninput="calcEdge()"><span class="range-val" id="myProbVal">55%</span></div>
+      <div class="range-row"><label>Market YES price</label><input type="range" min="1" max="99" value="34" step="1" id="mktProb" oninput="calcEdge()"><span class="range-val" id="mktProbVal">34¢</span></div>
+      <div class="range-row"><label>Stake ($)</label><input type="range" min="10" max="2000" value="100" step="10" id="stake" oninput="calcEdge()"><span class="range-val" id="stakeVal">$100</span></div>
+      <div class="divider"></div>
+      <div style="display:flex;gap:14px;align-items:flex-end;margin-bottom:10px">
+        <div><div class="section-label">Edge</div><div class="edge-metric" id="edgeVal">+21%</div></div>
+        <div style="flex:1"><div class="section-label">Expected value</div><div class="edge-metric" id="evVal">+$38.24</div></div>
+        <div><div class="section-label">Kelly %</div><div class="edge-metric" id="kellyVal">27%</div></div>
       </div>
-      <div class="range-row">
-        <label>Market YES price</label>
-        <input type="range" min="1" max="99" value="34" step="1" id="mktProb" oninput="calcEdge()">
-        <span class="range-val" id="mktProbVal">34¢</span>
-      </div>
-      <div class="range-row">
-        <label>Stake ($)</label>
-        <input type="range" min="10" max="2000" value="100" step="10" id="stake" oninput="calcEdge()">
-        <span class="range-val" id="stakeVal">$100</span>
+      <div class="bar-wrap" style="margin-bottom:11px"><div class="bar-inner" id="edgeBar" style="background:var(--accent);width:55%"></div></div>
+      <div class="section-label">Signal</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:5px">
+        <span class="badge badge-green" id="signalBadge" style="font-size:12px;padding:4px 12px">BUY YES — Strong edge</span>
+        <span style="font-size:12px;color:var(--text3)" id="signalNote">Your prob 21pts above market</span>
       </div>
       <div class="divider"></div>
-      <div style="display:flex;gap:16px;align-items:flex-end;margin-bottom:10px;">
-        <div>
-          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--text3);margin-bottom:4px;">Edge</div>
-          <div class="edge-metric" id="edgeVal">+21%</div>
-        </div>
-        <div style="flex:1;">
-          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--text3);margin-bottom:4px;">Expected value</div>
-          <div class="edge-metric" id="evVal">+$38.24</div>
-        </div>
-        <div>
-          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--text3);margin-bottom:4px;">Kelly %</div>
-          <div class="edge-metric" id="kellyVal">27%</div>
-        </div>
-      </div>
-      <div class="bar-wrap" style="margin-bottom:12px;">
-        <div class="bar-inner" id="edgeBar" style="background:var(--accent);width:55%;"></div>
-      </div>
-      <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--text3);margin-bottom:6px;">Signal</div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <span class="badge badge-green" id="signalBadge" style="font-size:12px;padding:4px 14px;">BUY YES — Strong edge</span>
-        <span style="font-size:12px;color:var(--text3);" id="signalNote">Your prob 21pts above market</span>
-      </div>
-      <div class="divider"></div>
-      <div style="font-size:12px;color:var(--text3);line-height:1.6;">
-        <strong style="color:var(--text2);">Kelly formula:</strong> f = (bp − q) / b where b = (1/price − 1), p = your prob, q = 1−p. Use fractional Kelly (25–50%) to manage variance.
-      </div>
+      <div style="font-size:12px;color:var(--text3);line-height:1.6"><strong style="color:var(--text2)">Kelly:</strong> f=(bp−q)/b · Use 25–50% fractional Kelly for weather market variance</div>
     </div>
 
     <!-- AI analyst -->
     <div class="card">
       <div class="card-header">
-        <span class="card-title">
-          <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          AI trade analyst
-        </span>
+        <span class="card-title"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>AI trade analyst</span>
         <span class="badge badge-teal">Claude-powered</span>
       </div>
-      <div class="ai-box" id="aiBox" style="color:var(--text3);font-style:italic;">
-        Ask Claude to analyze your trade — temperature sources, edge, percentile rank, model spread, market pricing, and historical patterns are all fed in as context.
+      <div class="ai-box" id="aiBox" style="color:var(--text3);font-style:italic">
+        Ask Claude to analyze your trade — all 5 systems feed into context: station bias, intraday momentum, microstructure, forecast velocity, historical percentile, and live source spread.
       </div>
       <div class="ai-input-row">
-        <input type="text" id="aiInput" placeholder="e.g. Should I buy YES given the current forecast?" onkeydown="if(event.key==='Enter')runAI()">
+        <input type="text" id="aiInput" placeholder="e.g. Should I buy YES given afternoon momentum and station bias?" onkeydown="if(event.key==='Enter')runAI()">
         <button class="btn btn-primary" onclick="runAI()">Analyze ↗</button>
       </div>
       <div class="quick-pills">
-        <button class="quick-pill" onclick="quickPrompt('What does the spread between sources tell me about forecast uncertainty and should I reduce my position size?')">Source spread risk</button>
-        <button class="quick-pill" onclick="quickPrompt('Explain how to size a Kelly bet here and what fractional Kelly I should use given weather market variance')">Kelly sizing</button>
-        <button class="quick-pill" onclick="quickPrompt('How should I interpret the current temperature percentile rank when deciding whether to buy YES or NO on a temperature threshold market?')">Percentile guide</button>
-        <button class="quick-pill" onclick="quickPrompt('What are the key risks to fading the current weather market consensus, and when is model divergence a real edge vs noise?')">Fade vs follow</button>
-        <button class="quick-pill" onclick="quickPrompt('What historical base rates should I consider for extreme temperature events in this city and month?')">Base rates</button>
+        <button class="quick-pill" onclick="quickPrompt('Given the station bias and intraday momentum, what is my real edge on this market?')">Station + momentum edge</button>
+        <button class="quick-pill" onclick="quickPrompt('What does forecast velocity tell me about whether the market has already priced in the revision?')">Velocity lag</button>
+        <button class="quick-pill" onclick="quickPrompt('Explain the arbitrage opportunity in the temperature bin pricing and how to trade it.')">Bin arb</button>
+        <button class="quick-pill" onclick="quickPrompt('What Kelly fraction should I use for a weather market given current model spread and station uncertainty?')">Kelly sizing</button>
+        <button class="quick-pill" onclick="quickPrompt('Is there a scalping opportunity in the next 2 hours given current heating rate and solar angle?')">Scalp signal</button>
+        <button class="quick-pill" onclick="quickPrompt('How does the resolution source rounding behavior affect my probability estimate for this market?')">Resolution quirks</button>
       </div>
     </div>
   </div>
+</div>
 
-  <div class="footer">
-    Weather data: Open-Meteo (free, no key) · wttr.in (free, no key) · Visual Crossing (free key) · AccuWeather (free key) &nbsp;|&nbsp;
-    Markets: Polymarket Gamma API (free, no key) &nbsp;|&nbsp;
-    AI: Anthropic Claude API
-  </div>
+<!-- Footer -->
+<div class="footer">
+  Weather: Open-Meteo (free) · wttr.in (free) · Visual Crossing (free key) · AccuWeather (free key) &nbsp;|&nbsp;
+  Markets: Polymarket Gamma API (free) &nbsp;|&nbsp; AI: Anthropic Claude API
+</div>
 </div>
 
 <!-- Settings modal -->
 <div class="modal-bg" id="settingsModal">
   <div class="modal">
     <h2>API Keys</h2>
-    <p style="font-size:13px;color:var(--text2);">Optional keys unlock extra temperature sources. Keys are stored locally in your browser only.</p>
+    <p style="font-size:13px;color:var(--text2)">Keys stored locally in your browser only — never sent to GitHub.</p>
     <label>Visual Crossing API Key</label>
-    <input type="text" id="vcKey" placeholder="Paste your Visual Crossing key here">
-    <p class="modal-note">Free at <a href="https://www.visualcrossing.com/weather-api" target="_blank">visualcrossing.com</a> — up to 1,000 calls/day</p>
+    <input type="text" id="vcKey" placeholder="Your Visual Crossing key">
+    <p class="modal-note">Free at <a href="https://www.visualcrossing.com/weather-api" target="_blank">visualcrossing.com</a> — 1,000 calls/day</p>
     <label>AccuWeather API Key</label>
-    <input type="text" id="awKey" placeholder="Paste your AccuWeather key here">
-    <p class="modal-note">Free at <a href="https://developer.accuweather.com" target="_blank">developer.accuweather.com</a> — up to 50 calls/day</p>
-    <label>Anthropic API Key (for AI analyst)</label>
+    <input type="text" id="awKey" placeholder="Your AccuWeather key">
+    <p class="modal-note">Free at <a href="https://developer.accuweather.com" target="_blank">developer.accuweather.com</a> — 50 calls/day</p>
+    <label>Anthropic API Key (AI analyst)</label>
     <input type="text" id="anthropicKey" placeholder="sk-ant-…">
-    <p class="modal-note">Get yours at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a></p>
+    <p class="modal-note">Get at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a></p>
     <div class="modal-footer">
       <button class="btn" onclick="closeSettings()">Cancel</button>
       <button class="btn btn-primary" onclick="saveSettings()">Save & reload</button>
@@ -413,523 +588,816 @@
 </div>
 
 <script>
-// ─── State ───────────────────────────────────────────────────────────────────
-let city = { name:'New York', lat:40.7128, lon:-74.0060 };
+// ═══════════════════════════════════════════════════════════════ STATE
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+let city = { name:'New York', lat:40.7128, lon:-74.0060, icao:'KJFK', stationName:'New York JFK' };
 let liveTemps = {};
 let histData = { monthly:[], trend:[], records:{} };
 let polyMarkets = [];
-let histChartObj = null;
-let currentHistTab = 'dist';
-const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+let forecastSnapshots = []; // for velocity tracking
+let intradayData = { hourly:[], currentHour:0 };
+let binPrices = {}; // for microstructure
+let histChartObj=null, heatingChartObj=null, intradayChartObj=null, microChartObj=null, velocityChartObj=null;
+let currentHistTab='dist';
 
-// ─── Settings ─────────────────────────────────────────────────────────────────
-function getKeys() {
-  return {
-    vc: localStorage.getItem('vc_key') || '',
-    aw: localStorage.getItem('aw_key') || '',
-    anthropic: localStorage.getItem('anthropic_key') || ''
-  };
-}
-function openSettings() {
-  const k = getKeys();
-  document.getElementById('vcKey').value = k.vc;
-  document.getElementById('awKey').value = k.aw;
-  document.getElementById('anthropicKey').value = k.anthropic;
-  document.getElementById('settingsModal').classList.add('open');
-}
-function closeSettings() { document.getElementById('settingsModal').classList.remove('open'); }
-function saveSettings() {
-  localStorage.setItem('vc_key', document.getElementById('vcKey').value.trim());
-  localStorage.setItem('aw_key', document.getElementById('awKey').value.trim());
-  localStorage.setItem('anthropic_key', document.getElementById('anthropicKey').value.trim());
-  closeSettings();
-  refreshAll();
+// ═══════════════════════════════════════════════════════════════ STATION PROFILES
+const STATION_PROFILES = {
+  KJFK: {
+    bias: +0.8, biasNote: 'Runs ~0.8°C warmer than GFS consensus on calm sunny days',
+    overshootFreq: '34%', overshootNote: 'Overshoots forecast high in 34% of May/Jun cases',
+    marineSuppression: 'Low', marineNote: 'Occasional sea breeze from Jamaica Bay suppresses afternoon high',
+    revisionFreq: 'Moderate', revisionNote: 'NWS revises JFK forecasts ~2.1x daily on average',
+    UHI: 'Moderate', UIHNote: '+1.2°C vs surrounding suburbs',
+    windSuppression: 'High', windNote: 'SW ocean winds >15kts cap max by ~1.5°C',
+    resStation: 'KJFK ASOS', resSource: 'ASOS / NWS', resRounding: 'Rounds to nearest 0.1°C then integer °F for US markets',
+    updateTime: 'Top of hour + :20 :50 mins', revFreq: '2–3x daily', stationDelta: '+0.8°C avg vs model consensus',
+    edgeNote: 'JFK systematically overshoots GFS on days with S/SW wind and low humidity. Marine layer from Jamaica Bay is rare but caps afternoon highs ~1.5°C below forecast. Best edge: clear calm mornings → lean YES on high thresholds.',
+    heatPattern: [14,15,17,19,22,24,26,27,27.5,28,27,25,23],
+    heatNote: 'JFK heats aggressively 9am–2pm, peaks around 2–3pm. Afternoon sea breeze can arrest heating abruptly after 3pm.'
+  },
+  KLAX: {
+    bias: -0.6, biasNote: 'Runs ~0.6°C cooler than models due to marine layer',
+    overshootFreq: '18%', overshootNote: 'Only overshoots on Santa Ana wind days (offshore flow)',
+    marineSuppression: 'Very High', marineNote: 'Marine layer suppresses morning temps, often burns off by noon',
+    revisionFreq: 'High', revisionNote: 'Marine layer uncertainty drives frequent revisions',
+    UHI: 'Low', UIHNote: 'Airport location moderates UHI effect',
+    windSuppression: 'Moderate', windNote: 'Onshore flow common, suppresses max by 1–2°C',
+    resStation: 'KLAX ASOS', resSource: 'ASOS / NWS', resRounding: 'Integer °F for US markets',
+    updateTime: 'Top of hour', revFreq: '3–4x daily', stationDelta: '-0.6°C avg vs models',
+    edgeNote: 'LAX is a "data formatting market" on marine layer days. If marine layer is present at 10am, max temp is usually 2–3°C below model forecast. Santa Ana winds = inverse — models underestimate. Check synoptic pattern first.',
+    heatPattern: [16,16.5,17,18,20,22,24,25,25.5,25,24,22,20],
+    heatNote: 'LAX heats slowly until marine layer clears (~11am), then rapid rise. Plateau earlier than continental stations.'
+  },
+  KORD: {
+    bias: +0.3, biasNote: 'Slight warm bias on days with southerly flow',
+    overshootFreq: '29%', overshootNote: 'Frequent overshoot with S/SW flow from warm prairie',
+    marineSuppression: 'None', marineNote: 'No marine influence',
+    revisionFreq: 'Low', revisionNote: 'Models generally reliable for O\'Hare',
+    UHI: 'High', UIHNote: '+2.1°C vs surrounding rural areas',
+    windSuppression: 'Very High', windNote: 'Lake Michigan N/NE winds cap temps sharply (-3°C effect)',
+    resStation: 'KORD ASOS', resSource: 'ASOS / NWS', resRounding: 'Integer °F',
+    updateTime: 'Top of hour', revFreq: '1–2x daily', stationDelta: '+0.3°C avg',
+    edgeNote: 'O\'Hare lake effect is huge edge. N/NE lake winds visible in synoptic setup 24h ahead. On lake wind days, fade YES on high thresholds aggressively — models systematically overestimate. Check 850mb wind direction.',
+    heatPattern: [12,13,15,17,19,22,24,25,26,25.5,24,22,20],
+    heatNote: 'O\'Hare heats smoothly with southerly flow. Lake wind onset (usually 1–3pm) can abruptly stop heating or cause temperature drop.'
+  },
+  KMIA: {
+    bias: +0.4, biasNote: 'Slight warm bias, humidity suppression sometimes undercounted',
+    overshootFreq: '41%', overshootNote: 'High overshoot on low-humidity days (rare in Miami)',
+    marineSuppression: 'Low', marineNote: 'Sea breezes common but mild effect on max',
+    revisionFreq: 'Low', revisionNote: 'Tropical stability = few revisions',
+    UHI: 'Very High', UIHNote: '+2.8°C vs Everglades reference',
+    windSuppression: 'Low', windNote: 'Light winds typical, minimal suppression',
+    resStation: 'KMIA ASOS', resSource: 'ASOS / NWS', resRounding: 'Integer °F',
+    updateTime: 'Top of hour', revFreq: '1–2x daily', stationDelta: '+0.4°C avg',
+    edgeNote: 'Miami edge: humidity suppression. Very high dewpoint days cap max 1–2°C below dry-air forecasts. Models sometimes undercount this. Check dewpoint: if DP >24°C, shade YES on very high thresholds.',
+    heatPattern: [27,27.5,28,29,30,31,32,33,33.5,33,32,30,29],
+    heatNote: 'Miami heats early and maintains high temps. Afternoon thunderstorms (4–6pm) can crash temps 3–5°C rapidly.'
+  },
+  EGLL: {
+    bias: -0.4, biasNote: 'Slightly cooler than model consensus due to Thames valley effects',
+    overshootFreq: '22%', overshootNote: 'Overshoot mainly on continental high pressure days',
+    marineSuppression: 'Moderate', marineNote: 'Atlantic influence moderates extremes',
+    revisionFreq: 'Very High', revisionNote: 'UK weather notoriously variable, models update frequently',
+    UHI: 'High', UIHNote: '+2.3°C vs surrounding countryside',
+    windSuppression: 'High', windNote: 'SW Atlantic winds frequently suppress highs',
+    resStation: 'EGLL / Heathrow', resSource: 'Met Office / SYNOP', resRounding: 'Rounds to 0.1°C',
+    updateTime: 'Hourly SYNOP', revFreq: '4–6x daily', stationDelta: '-0.4°C avg vs ECMWF',
+    edgeNote: 'Heathrow markets are forecast accuracy bets more than temperature bets. ECMWF generally outperforms GFS for UK. On blocking high days (Azores ridge), models underestimate max — buy YES on those setups. Convective setups = high revision risk.',
+    heatPattern: [9,9.5,10,12,14,16,18,19,19.5,19,17,15,12],
+    heatNote: 'London heats slowly, peaks late (3–4pm). Continental air masses can push max 4–5°C above typical. Cloudy mornings frequently fail to reach forecast max.'
+  },
+  SBGR: {
+    bias: +1.1, biasNote: 'SBGR systematically overshoots model forecasts by ~1.1°C',
+    overshootFreq: '47%', overshootNote: 'Very frequent overshoot — models underestimate UHI here',
+    marineSuppression: 'None', marineNote: 'Inland station, no marine influence',
+    revisionFreq: 'Moderate', revisionNote: 'Afternoon convection drives revisions in summer',
+    UHI: 'Very High', UIHNote: '+3.2°C vs São Paulo plateau reference',
+    windSuppression: 'Low', windNote: 'Calm conditions typical near airport',
+    resStation: 'SBGR METAR', resSource: 'REDEMET / INMET', resRounding: 'Rounds to nearest integer °C',
+    updateTime: 'METAR every 30min', revFreq: '2–3x daily', stationDelta: '+1.1°C vs GFS consensus',
+    edgeNote: 'SBGR is the best edge station on this dashboard. Models consistently underestimate due to massive local UHI. Systematic +1.1°C bias means YES on temp thresholds is structurally underpriced if market uses model consensus. Track REDEMET for resolution data.',
+    heatPattern: [19,19.5,20,22,24,26,28,29,30,29.5,28,25,22],
+    heatNote: 'SBGR heats rapidly after 9am. Winter months (Jun–Aug) see cool mornings but rapid afternoon rise. Summer convection can cap or crash max after 3pm.'
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════ NAV
+function showPanel(id) {
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  event.target.classList.add('active');
+  if(id==='station') renderStationProfile();
+  if(id==='intraday') renderIntraday();
+  if(id==='microstructure') renderMicrostructure();
+  if(id==='velocity') renderVelocity();
 }
 
-// ─── City selector ────────────────────────────────────────────────────────────
-function selectCity(btn, name, lat, lon) {
-  city = { name, lat, lon };
-  document.querySelectorAll('#cityBtns .btn').forEach(b => b.classList.remove('active'));
+// ═══════════════════════════════════════════════════════════════ SETTINGS
+function getKeys(){ return { vc:localStorage.getItem('vc_key')||'', aw:localStorage.getItem('aw_key')||'', anthropic:localStorage.getItem('anthropic_key')||'' }; }
+function openSettings(){ const k=getKeys(); document.getElementById('vcKey').value=k.vc; document.getElementById('awKey').value=k.aw; document.getElementById('anthropicKey').value=k.anthropic; document.getElementById('settingsModal').classList.add('open'); }
+function closeSettings(){ document.getElementById('settingsModal').classList.remove('open'); }
+function saveSettings(){ localStorage.setItem('vc_key',document.getElementById('vcKey').value.trim()); localStorage.setItem('aw_key',document.getElementById('awKey').value.trim()); localStorage.setItem('anthropic_key',document.getElementById('anthropicKey').value.trim()); closeSettings(); refreshAll(); }
+
+// ═══════════════════════════════════════════════════════════════ CITY
+function selectCity(btn, name, lat, lon, icao, stationName) {
+  city = { name, lat, lon, icao, stationName };
+  document.querySelectorAll('#cityBtns .btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   refreshAll();
 }
 
-// ─── Status ───────────────────────────────────────────────────────────────────
-function setStatus(msg, live=false) {
-  document.getElementById('statusText').textContent = msg;
-  document.getElementById('statusDot').className = 'status-dot' + (live ? ' live' : '');
+function setStatus(msg,live=false){ document.getElementById('statusText').textContent=msg; document.getElementById('statusDot').className='status-dot'+(live?' live':''); }
+
+// ═══════════════════════════════════════════════════════════════ FETCH HELPERS
+async function fetchJSON(url){ const r=await fetch(url); if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }
+
+// ═══════════════════════════════════════════════════════════════ TEMPERATURE SOURCES
+async function fetchOpenMeteoModel(model) {
+  const url=`https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&daily=temperature_2m_max&temperature_unit=celsius&forecast_days=1&models=${model}`;
+  const d=await fetchJSON(url);
+  return Math.round(d.daily.temperature_2m_max[0]*10)/10;
 }
 
-// ─── Fetch helpers ────────────────────────────────────────────────────────────
-async function fetchJSON(url) {
-  const r = await fetch(url);
-  if (!r.ok) throw new Error('HTTP ' + r.status);
-  return r.json();
-}
-
-// ─── Temperature sources ──────────────────────────────────────────────────────
-async function fetchOpenMeteoGFS() {
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&daily=temperature_2m_max&temperature_unit=celsius&forecast_days=1&models=gfs_seamless`;
-  const d = await fetchJSON(url);
-  return Math.round(d.daily.temperature_2m_max[0] * 10) / 10;
-}
-
-async function fetchOpenMeteoICON() {
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&daily=temperature_2m_max&temperature_unit=celsius&forecast_days=1&models=icon_seamless`;
-  const d = await fetchJSON(url);
-  return Math.round(d.daily.temperature_2m_max[0] * 10) / 10;
-}
-
-async function fetchOpenMeteoECMWF() {
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&daily=temperature_2m_max&temperature_unit=celsius&forecast_days=1&models=ecmwf_ifs025`;
-  const d = await fetchJSON(url);
-  return Math.round(d.daily.temperature_2m_max[0] * 10) / 10;
-}
-
-async function fetchWttr() {
-  const q = encodeURIComponent(`${city.lat},${city.lon}`);
-  const url = `https://wttr.in/${q}?format=j1`;
-  const d = await fetchJSON(url);
-  const c = d.weather[0].maxtempC;
-  return parseFloat(c);
+async function fetchOpenMeteoHourly() {
+  const url=`https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&hourly=temperature_2m,relativehumidity_2m,cloudcover,windspeed_10m&temperature_unit=celsius&forecast_days=1`;
+  const d=await fetchJSON(url);
+  return d.hourly;
 }
 
 async function fetchVisualCrossing(key) {
-  const today = new Date().toISOString().slice(0,10);
-  const url = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${city.lat},${city.lon}/${today}?unitGroup=metric&include=days&key=${key}&contentType=json`;
-  const d = await fetchJSON(url);
-  return Math.round(d.days[0].tempmax * 10) / 10;
+  const today=new Date().toISOString().slice(0,10);
+  const url=`https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${city.lat},${city.lon}/${today}?unitGroup=metric&include=days&key=${key}&contentType=json`;
+  const d=await fetchJSON(url);
+  return Math.round(d.days[0].tempmax*10)/10;
 }
 
 async function fetchAccuWeather(key) {
-  // First get location key
-  const locUrl = `https://dataservice.accuweather.com/locations/v1/cities/geoposition/search?apikey=${key}&q=${city.lat},${city.lon}`;
-  const loc = await fetchJSON(locUrl);
-  const locKey = loc.Key;
-  const fcUrl = `https://dataservice.accuweather.com/forecasts/v1/daily/1day/${locKey}?apikey=${key}&metric=true`;
-  const fc = await fetchJSON(fcUrl);
-  return Math.round(fc.DailyForecasts[0].Temperature.Maximum.Value * 10) / 10;
+  const loc=await fetchJSON(`https://dataservice.accuweather.com/locations/v1/cities/geoposition/search?apikey=${key}&q=${city.lat},${city.lon}`);
+  const fc=await fetchJSON(`https://dataservice.accuweather.com/forecasts/v1/daily/1day/${loc.Key}?apikey=${key}&metric=true`);
+  return Math.round(fc.DailyForecasts[0].Temperature.Maximum.Value*10)/10;
 }
 
 function renderSources() {
-  const names = ['Open-Meteo (GFS)', 'ECMWF (IFS)', 'Open-Meteo (ICON)', 'Visual Crossing', 'AccuWeather'];
-  const keys  = ['gfs', 'ecmwf', 'icon', 'vc', 'aw'];
-  const dots  = { loaded:'dot-green', error:'dot-red', loading:'dot-gray', optional:'dot-amber' };
-
-  const container = document.getElementById('sourcesContainer');
-  container.innerHTML = '';
-
-  const vals = [];
-  keys.forEach((k, i) => {
-    const row = document.createElement('div');
-    row.className = 'src-row';
-    const t = liveTemps[k];
-    let dotClass = 'dot-gray';
-    let valHtml = '<span class="shimmer" style="width:40px;display:inline-block;">&nbsp;</span>';
-    if (t && t.status === 'ok') { dotClass = 'dot-green'; valHtml = `<span class="src-val">${t.val}°C</span>`; vals.push(t.val); }
-    else if (t && t.status === 'error') { dotClass = 'dot-red'; valHtml = `<span style="font-size:12px;color:var(--text3);">error</span>`; }
-    else if (t && t.status === 'optional') { dotClass = 'dot-amber'; valHtml = `<span style="font-size:12px;color:var(--text3);">add key ↗</span>`; }
-    row.innerHTML = `<span class="src-name"><span class="dot ${dotClass}"></span>${names[i]}</span>${valHtml}`;
+  const names=['Open-Meteo (GFS)','ECMWF (IFS)','Open-Meteo (ICON)','Visual Crossing','AccuWeather'];
+  const keys=['gfs','ecmwf','icon','vc','aw'];
+  const container=document.getElementById('sourcesContainer');
+  container.innerHTML='';
+  const vals=[];
+  keys.forEach((k,i)=>{
+    const row=document.createElement('div'); row.className='src-row';
+    const t=liveTemps[k];
+    let dotClass='dot-gray', valHtml='<span class="shimmer" style="width:44px;display:inline-block">&nbsp;</span>';
+    if(t&&t.status==='ok'){ dotClass='dot-green'; valHtml=`<span class="src-val">${t.val}°C</span>`; vals.push(t.val); }
+    else if(t&&t.status==='error'){ dotClass='dot-red'; valHtml=`<span style="font-size:12px;color:var(--text3)">error</span>`; }
+    else if(t&&t.status==='optional'){ dotClass='dot-amber'; valHtml=`<span style="font-size:12px;color:var(--text3)">add key ↗</span>`; }
+    row.innerHTML=`<span class="src-name"><span class="dot ${dotClass}"></span>${names[i]}</span>${valHtml}`;
     container.appendChild(row);
   });
-
-  // Update summary
-  if (vals.length > 0) {
-    const avg = Math.round((vals.reduce((a,b)=>a+b,0)/vals.length) * 10) / 10;
-    const spread = Math.round((Math.max(...vals) - Math.min(...vals)) * 10) / 10;
-    document.getElementById('statConsensus').textContent = avg + '°C';
-    document.getElementById('statConsensusSub').textContent = `Avg of ${vals.length} source${vals.length>1?'s':''} · ±${spread}°C spread`;
-    document.getElementById('statSpread').textContent = '±' + spread + '°C';
-    document.getElementById('srcSpreadBadge').textContent = `±${spread}°C spread`;
-
-    const agr = Math.max(0, Math.round(100 - (spread / (avg||1) * 300)));
-    document.getElementById('agreeBar').style.width = agr + '%';
-    const agrTxt = agr > 85 ? 'Strong' : agr > 65 ? 'Good' : 'Weak';
-    const agrCls = agr > 85 ? 'badge-green' : agr > 65 ? 'badge-amber' : 'badge-red';
-    document.getElementById('agreeBadge').textContent = agrTxt;
-    document.getElementById('agreeBadge').className = 'badge ' + agrCls;
+  if(vals.length>0){
+    const avg=Math.round(vals.reduce((a,b)=>a+b,0)/vals.length*10)/10;
+    const spread=Math.round((Math.max(...vals)-Math.min(...vals))*10)/10;
+    document.getElementById('statConsensus').textContent=avg+'°C';
+    document.getElementById('statConsensusSub').textContent=`Avg of ${vals.length} sources · ±${spread}°C spread`;
+    document.getElementById('statSpread').textContent='±'+spread+'°C';
+    document.getElementById('srcSpreadBadge').textContent='±'+spread+'°C spread';
+    const agr=Math.max(0,Math.round(100-(spread/(avg||1)*300)));
+    document.getElementById('agreeBar').style.width=agr+'%';
+    const agrTxt=agr>85?'Strong':agr>65?'Good':'Weak';
+    const agrCls=agr>85?'badge-green':agr>65?'badge-amber':'badge-red';
+    document.getElementById('agreeBadge').textContent=agrTxt;
+    document.getElementById('agreeBadge').className='badge '+agrCls;
   }
 }
 
 async function loadTemperatures() {
-  const keys = getKeys();
-  liveTemps = {};
-  renderSources();
+  const keys=getKeys(); liveTemps={}; renderSources();
+  const trySet=(k,fn)=>fn().then(v=>{liveTemps[k]={status:'ok',val:v};renderSources();}).catch(()=>{liveTemps[k]={status:'error'};renderSources();});
+  trySet('gfs',()=>fetchOpenMeteoModel('gfs_seamless'));
+  trySet('ecmwf',()=>fetchOpenMeteoModel('ecmwf_ifs025'));
+  trySet('icon',()=>fetchOpenMeteoModel('icon_seamless'));
+  if(keys.vc) trySet('vc',()=>fetchVisualCrossing(keys.vc)); else { liveTemps.vc={status:'optional'}; renderSources(); }
+  if(keys.aw) trySet('aw',()=>fetchAccuWeather(keys.aw)); else { liveTemps.aw={status:'optional'}; renderSources(); }
 
-  // GFS
-  fetchOpenMeteoGFS().then(v => { liveTemps.gfs = {status:'ok', val:v}; renderSources(); updateHistChartIfReady(); })
-    .catch(() => { liveTemps.gfs = {status:'error'}; renderSources(); });
+  // Load hourly data for intraday engine
+  fetchOpenMeteoHourly().then(h=>{
+    intradayData.hourly=h;
+    intradayData.currentHour=new Date().getHours();
+    if(document.getElementById('panel-intraday').classList.contains('active')) renderIntraday();
+  }).catch(()=>{});
 
-  // ECMWF
-  fetchOpenMeteoECMWF().then(v => { liveTemps.ecmwf = {status:'ok', val:v}; renderSources(); })
-    .catch(() => { liveTemps.ecmwf = {status:'error'}; renderSources(); });
-
-  // ICON
-  fetchOpenMeteoICON().then(v => { liveTemps.icon = {status:'ok', val:v}; renderSources(); })
-    .catch(() => {
-      // ICON not always available — try wttr as fallback
-      fetchWttr().then(v => { liveTemps.icon = {status:'ok', val:v}; renderSources(); })
-        .catch(() => { liveTemps.icon = {status:'error'}; renderSources(); });
-    });
-
-  // Visual Crossing
-  if (keys.vc) {
-    fetchVisualCrossing(keys.vc).then(v => { liveTemps.vc = {status:'ok', val:v}; renderSources(); })
-      .catch(() => { liveTemps.vc = {status:'error'}; renderSources(); });
-  } else {
-    liveTemps.vc = {status:'optional'};
-    renderSources();
-  }
-
-  // AccuWeather
-  if (keys.aw) {
-    fetchAccuWeather(keys.aw).then(v => { liveTemps.aw = {status:'ok', val:v}; renderSources(); })
-      .catch(() => { liveTemps.aw = {status:'error'}; renderSources(); });
-  } else {
-    liveTemps.aw = {status:'optional'};
-    renderSources();
-  }
+  // Record forecast snapshot for velocity
+  setTimeout(()=>{
+    const vals=Object.values(liveTemps).filter(t=>t.status==='ok').map(t=>t.val);
+    if(vals.length>0){
+      const avg=Math.round(vals.reduce((a,b)=>a+b,0)/vals.length*10)/10;
+      forecastSnapshots.push({ time:new Date(), temp:avg });
+      if(forecastSnapshots.length>12) forecastSnapshots.shift();
+      if(document.getElementById('panel-velocity').classList.contains('active')) renderVelocity();
+    }
+  },3000);
 }
 
-// ─── Historical data (Open-Meteo Archive) ─────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════ HISTORICAL
 async function loadHistoricalData() {
-  const now = new Date();
-  const month = now.getMonth() + 1;
-  const monthName = MONTHS[month - 1];
-  document.getElementById('chartCityLabel').textContent = city.name;
-  document.getElementById('chartMonthLabel').textContent = monthName;
-
-  // Last 10 years of same month
-  const endYear = now.getFullYear() - 1;
-  const startYear = endYear - 9;
-  const pad = n => String(n).padStart(2,'0');
-  const startDate = `${startYear}-${pad(month)}-01`;
-  const lastDay = new Date(endYear, month, 0).getDate();
-  const endDate = `${endYear}-${pad(month)}-${lastDay}`;
-
+  const now=new Date(), month=now.getMonth()+1;
+  const monthName=MONTHS[month-1];
+  document.getElementById('chartCityLabel').textContent=city.name;
+  document.getElementById('chartMonthLabel').textContent=monthName;
+  const endYear=now.getFullYear()-1, startYear=endYear-9;
+  const pad=n=>String(n).padStart(2,'0');
+  const lastDay=new Date(endYear,month,0).getDate();
   try {
-    const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${city.lat}&longitude=${city.lon}&start_date=${startDate}&end_date=${endDate}&daily=temperature_2m_max&temperature_unit=celsius`;
-    const d = await fetchJSON(url);
-    const temps = d.daily.temperature_2m_max.filter(v => v !== null);
-    const dates = d.daily.time;
-
-    // Monthly averages per year
-    const yearMap = {};
-    dates.forEach((dt, i) => {
-      const yr = dt.slice(0,4);
-      if (!yearMap[yr]) yearMap[yr] = [];
-      if (temps[i] !== undefined && temps[i] !== null) yearMap[yr].push(temps[i]);
-    });
-    const trend = Object.entries(yearMap).map(([yr, vs]) => ({
-      year: parseInt(yr),
-      avg: Math.round((vs.reduce((a,b)=>a+b,0)/vs.length)*10)/10
-    })).sort((a,b)=>a.year-b.year);
-
-    histData.trend = trend;
-    histData.monthly = temps;
-    histData.records = {
-      min: Math.round(Math.min(...temps)*10)/10,
-      max: Math.round(Math.max(...temps)*10)/10,
-      avg: Math.round((temps.reduce((a,b)=>a+b,0)/temps.length)*10)/10
-    };
-
-    // Percentile
-    const sorted = [...temps].sort((a,b)=>a-b);
-    const gfsVal = liveTemps.gfs?.val;
-    if (gfsVal !== undefined) {
-      const below = sorted.filter(v => v <= gfsVal).length;
-      const pct = Math.round(below / sorted.length * 100);
-      document.getElementById('statPercentile').textContent = pct + 'th';
-      document.getElementById('statPercentileSub').textContent = `Warmer than ${pct}% of ${monthName} days (10yr)`;
+    const url=`https://archive-api.open-meteo.com/v1/archive?latitude=${city.lat}&longitude=${city.lon}&start_date=${startYear}-${pad(month)}-01&end_date=${endYear}-${pad(month)}-${lastDay}&daily=temperature_2m_max&temperature_unit=celsius`;
+    const d=await fetchJSON(url);
+    const temps=d.daily.temperature_2m_max.filter(v=>v!==null);
+    const dates=d.daily.time;
+    const yearMap={};
+    dates.forEach((dt,i)=>{ const yr=dt.slice(0,4); if(!yearMap[yr])yearMap[yr]=[]; if(temps[i]!=null)yearMap[yr].push(temps[i]); });
+    histData.trend=Object.entries(yearMap).map(([yr,vs])=>({year:parseInt(yr),avg:Math.round(vs.reduce((a,b)=>a+b,0)/vs.length*10)/10})).sort((a,b)=>a.year-b.year);
+    histData.monthly=temps;
+    histData.records={ min:Math.round(Math.min(...temps)*10)/10, max:Math.round(Math.max(...temps)*10)/10, avg:Math.round(temps.reduce((a,b)=>a+b,0)/temps.length*10)/10 };
+    const sorted=[...temps].sort((a,b)=>a-b);
+    const gfsVal=liveTemps.gfs?.val;
+    if(gfsVal!=null){
+      const pct=Math.round(sorted.filter(v=>v<=gfsVal).length/sorted.length*100);
+      document.getElementById('statPercentile').textContent=pct+'th';
+      document.getElementById('statPercentileSub').textContent=`Warmer than ${pct}% of ${monthName} days (10yr)`;
     }
-
-    const avg10 = histData.records.avg;
-    document.getElementById('statHistAvg').textContent = avg10 + '°C';
-    if (gfsVal !== undefined) {
-      const anom = Math.round((gfsVal - avg10)*10)/10;
-      const anomStr = anom >= 0 ? `+${anom}°C above 10yr avg` : `${anom}°C below 10yr avg`;
-      const anomColor = Math.abs(anom) > 3 ? 'var(--warn)' : anom >= 0 ? 'var(--up)' : 'var(--info)';
-      document.getElementById('statAnomaly').innerHTML = `Anomaly: <span style="color:${anomColor};font-weight:600;">${anomStr}</span>`;
+    document.getElementById('statHistAvg').textContent=histData.records.avg+'°C';
+    if(gfsVal!=null){
+      const anom=Math.round((gfsVal-histData.records.avg)*10)/10;
+      const anomStr=anom>=0?`+${anom}°C above 10yr avg`:`${anom}°C below 10yr avg`;
+      const anomColor=Math.abs(anom)>3?'var(--warn)':anom>=0?'var(--up)':'var(--info)';
+      document.getElementById('statAnomaly').innerHTML=`Anomaly: <span style="color:${anomColor};font-weight:600">${anomStr}</span>`;
     }
-
     drawHistChart(currentHistTab);
-  } catch(e) {
-    console.error('Historical load error:', e);
-    document.getElementById('statHistAvg').textContent = 'Error';
-  }
+  } catch(e){ document.getElementById('statHistAvg').textContent='Error'; }
 }
 
-function updateHistChartIfReady() {
-  if (histData.monthly.length > 0) drawHistChart(currentHistTab);
-}
-
-function setHistTab(btn, tab) {
-  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  currentHistTab = tab;
-  drawHistChart(tab);
-}
+function setHistTab(btn,tab){ document.querySelectorAll('#panel-overview .tab').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); currentHistTab=tab; drawHistChart(tab); }
 
 function drawHistChart(tab) {
-  if (histChartObj) { histChartObj.destroy(); histChartObj = null; }
-  const ctx = document.getElementById('histChart').getContext('2d');
-  const isDark = window.matchMedia('(prefers-color-scheme:dark)').matches;
-  const textColor = isDark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.45)';
-  const gridColor = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
-  const currentVal = liveTemps.gfs?.val ?? null;
-
-  if (tab === 'dist' && histData.monthly.length > 0) {
-    const temps = histData.monthly;
-    const min = Math.floor(Math.min(...temps));
-    const max = Math.ceil(Math.max(...temps));
-    const step = 2;
-    const buckets = [];
-    for (let t = min; t <= max; t += step) buckets.push(t);
-    const counts = buckets.map(b => temps.filter(v => v >= b && v < b+step).length);
-    const colors = buckets.map(b => currentVal !== null && Math.abs(b - currentVal) <= step ? '#1D9E75' : (isDark?'rgba(255,255,255,0.18)':'rgba(0,0,0,0.14)'));
-    document.getElementById('chartAxisLabels').innerHTML = [min, min+Math.round((max-min)/4), min+Math.round((max-min)/2), min+Math.round(3*(max-min)/4), max].map(v=>v+'°C').map(v=>`<span>${v}</span>`).join('');
-    histChartObj = new Chart(ctx, {
-      type:'bar',
-      data:{ labels:buckets.map(b=>b+'°C'), datasets:[{data:counts, backgroundColor:colors, borderRadius:3, borderWidth:0}] },
-      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.raw} days`}}}, scales:{x:{ticks:{color:textColor,font:{size:11},maxTicksLimit:8},grid:{display:false}},y:{ticks:{color:textColor,font:{size:11}},grid:{color:gridColor},title:{display:true,text:'Days',color:textColor,font:{size:11}}}}}
-    });
-  } else if (tab === 'trend' && histData.trend.length > 0) {
-    const labels = histData.trend.map(d=>String(d.year));
-    const vals = histData.trend.map(d=>d.avg);
-    document.getElementById('chartAxisLabels').innerHTML = '';
-    histChartObj = new Chart(ctx, {
-      type:'line',
-      data:{ labels, datasets:[{label:'Avg daily max (°C)', data:vals, borderColor:'#1D9E75', backgroundColor:'rgba(29,158,117,0.08)', pointBackgroundColor:'#1D9E75', pointRadius:4, tension:0.35, fill:true}] },
-      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{ticks:{color:textColor,font:{size:11}},grid:{display:false}},y:{ticks:{color:textColor,font:{size:11},callback:v=>v+'°C'},grid:{color:gridColor}}}}
-    });
-  } else if (tab === 'extremes' && histData.records.avg !== undefined) {
-    const r = histData.records;
-    const labels = ['10yr avg','10yr record low','10yr record high','Today forecast'];
-    const vals = [r.avg, r.min, r.max, currentVal ?? r.avg];
-    const colors = ['rgba(0,0,0,0.2)','#185FA5','#A32D2D','#1D9E75'];
-    document.getElementById('chartAxisLabels').innerHTML = '';
-    histChartObj = new Chart(ctx, {
-      type:'bar',
-      data:{ labels, datasets:[{data:vals, backgroundColor:colors, borderRadius:4, borderWidth:0}] },
-      options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.raw+'°C'}}}, scales:{x:{ticks:{color:textColor,font:{size:11}},grid:{display:false}},y:{ticks:{color:textColor,font:{size:11},callback:v=>v+'°C'},grid:{color:gridColor}}}}
-    });
+  if(histChartObj){histChartObj.destroy();histChartObj=null;}
+  const ctx=document.getElementById('histChart').getContext('2d');
+  const isDark=matchMedia('(prefers-color-scheme:dark)').matches;
+  const tc=isDark?'rgba(255,255,255,.5)':'rgba(0,0,0,.45)';
+  const gc=isDark?'rgba(255,255,255,.07)':'rgba(0,0,0,.06)';
+  const currentVal=liveTemps.gfs?.val??null;
+  if(tab==='dist'&&histData.monthly.length>0){
+    const temps=histData.monthly, mn=Math.floor(Math.min(...temps)), mx=Math.ceil(Math.max(...temps)), step=2;
+    const buckets=[], counts=[], colors=[];
+    for(let t=mn;t<=mx;t+=step){ buckets.push(t); counts.push(temps.filter(v=>v>=t&&v<t+step).length); colors.push(currentVal!==null&&Math.abs(t-currentVal)<=step?'#1D9E75':(isDark?'rgba(255,255,255,.18)':'rgba(0,0,0,.14)')); }
+    document.getElementById('chartAxisLabels').innerHTML=[mn,mn+Math.round((mx-mn)/4),mn+Math.round((mx-mn)/2),mn+Math.round(3*(mx-mn)/4),mx].map(v=>v+'°C').map(v=>`<span>${v}</span>`).join('');
+    histChartObj=new Chart(ctx,{type:'bar',data:{labels:buckets.map(b=>b+'°C'),datasets:[{data:counts,backgroundColor:colors,borderRadius:3,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.raw} days`}}},scales:{x:{ticks:{color:tc,font:{size:11},maxTicksLimit:8},grid:{display:false}},y:{ticks:{color:tc,font:{size:11}},grid:{color:gc},title:{display:true,text:'Days',color:tc,font:{size:11}}}}}});
+  } else if(tab==='trend'&&histData.trend.length>0){
+    document.getElementById('chartAxisLabels').innerHTML='';
+    histChartObj=new Chart(ctx,{type:'line',data:{labels:histData.trend.map(d=>String(d.year)),datasets:[{label:'Avg daily max (°C)',data:histData.trend.map(d=>d.avg),borderColor:'#1D9E75',backgroundColor:'rgba(29,158,117,0.08)',pointBackgroundColor:'#1D9E75',pointRadius:4,tension:.35,fill:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tc,font:{size:11}},grid:{display:false}},y:{ticks:{color:tc,font:{size:11},callback:v=>v+'°C'},grid:{color:gc}}}}});
+  } else if(tab==='extremes'&&histData.records.avg!=null){
+    const r=histData.records;
+    document.getElementById('chartAxisLabels').innerHTML='';
+    histChartObj=new Chart(ctx,{type:'bar',data:{labels:['10yr avg','10yr record low','10yr record high','Today forecast'],datasets:[{data:[r.avg,r.min,r.max,currentVal??r.avg],backgroundColor:['rgba(0,0,0,0.18)','#185FA5','#A32D2D','#1D9E75'],borderRadius:4,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.raw+'°C'}}},scales:{x:{ticks:{color:tc,font:{size:11}},grid:{display:false}},y:{ticks:{color:tc,font:{size:11},callback:v=>v+'°C'},grid:{color:gc}}}}});
   }
 }
 
-// ─── Polymarket ───────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════ POLYMARKET
 async function loadPolymarkets() {
-  document.getElementById('marketsContainer').innerHTML = '<div style="color:var(--text3);font-size:13px;padding:12px 0;">Fetching live markets…</div>';
-
-  // Strict weather keywords — must match to be shown
-  const weatherKw = ['temperature','degrees','°f','°c','high of','low of','heat','heatwave','cold snap','freeze','frost','rainfall','precipitation','inches of rain','snowfall','blizzard','hurricane','typhoon','tornado','wildfire','drought','flood','climate','weather'];
-
-  const isWeather = q => {
-    const lq = q.toLowerCase();
-    return weatherKw.some(kw => lq.includes(kw));
-  };
-
+  document.getElementById('marketsContainer').innerHTML='<div style="color:var(--text3);font-size:13px;padding:10px 0">Fetching live markets…</div>';
+  const isWeather=q=>{ const lq=q.toLowerCase(); return ['temperature','degrees','°f','°c','high of','low of','heat wave','heatwave','cold snap','freeze','frost','rainfall','precipitation','inches of rain','snowfall','blizzard','hurricane','typhoon','tornado','wildfire','drought','flood','weather'].some(kw=>lq.includes(kw)); };
   try {
-    // Strategy 1: use tag_slug=weather on events endpoint, then flatten markets
-    const eventsUrl = 'https://gamma-api.polymarket.com/events?closed=false&archived=false&limit=20&tag_slug=weather&active=true';
-    const events = await fetchJSON(eventsUrl);
-    if (events && events.length > 0) {
-      const markets = events.flatMap(e => e.markets || []).filter(m => !m.closed && !m.archived);
-      polyMarkets = markets.slice(0, 6);
-      renderMarkets();
-      return;
-    }
+    const ev=await fetchJSON('https://gamma-api.polymarket.com/events?closed=false&archived=false&limit=20&tag_slug=weather&active=true');
+    if(ev&&ev.length>0){ polyMarkets=ev.flatMap(e=>e.markets||[]).filter(m=>!m.closed&&!m.archived).slice(0,6); renderMarkets(); return; }
     throw new Error('no events');
-  } catch(e1) {
+  } catch {
     try {
-      // Strategy 2: markets endpoint with tag_slug
-      const url2 = 'https://gamma-api.polymarket.com/markets?closed=false&archived=false&limit=50&tag_slug=weather';
-      const markets = await fetchJSON(url2);
-      if (markets && markets.length > 0) {
-        polyMarkets = markets.filter(m => !m.closed).slice(0, 6);
-        renderMarkets();
-        return;
-      }
+      const m=await fetchJSON('https://gamma-api.polymarket.com/markets?closed=false&archived=false&limit=50&tag_slug=weather');
+      if(m&&m.length>0){ polyMarkets=m.filter(x=>!x.closed).slice(0,6); renderMarkets(); return; }
       throw new Error('none');
-    } catch(e2) {
+    } catch {
       try {
-        // Strategy 3: search by keyword in question field
-        const url3 = 'https://gamma-api.polymarket.com/markets?closed=false&archived=false&limit=100&order=volume&ascending=false';
-        const all = await fetchJSON(url3);
-        const filtered = (all || []).filter(m => isWeather(m.question || ''));
-        if (filtered.length > 0) {
-          polyMarkets = filtered.slice(0, 6);
-          renderMarkets();
-          return;
-        }
+        const all=await fetchJSON('https://gamma-api.polymarket.com/markets?closed=false&archived=false&limit=100&order=volume&ascending=false');
+        const f=(all||[]).filter(m=>isWeather(m.question||''));
+        if(f.length>0){ polyMarkets=f.slice(0,6); renderMarkets(); return; }
         throw new Error('none after filter');
-      } catch(e3) {
-        document.getElementById('marketsContainer').innerHTML = `
-          <div style="font-size:13px;color:var(--text2);padding:12px 0;line-height:1.6;">
-            No live weather markets found right now — Polymarket may not have active weather markets at this moment.<br><br>
-            <a href="https://polymarket.com/markets?_c=weather" target="_blank" style="color:var(--accent);">Browse weather markets on Polymarket ↗</a>
-          </div>`;
+      } catch {
+        document.getElementById('marketsContainer').innerHTML=`<div style="font-size:13px;color:var(--text2);padding:10px 0;line-height:1.6">No live weather markets found.<br><a href="https://polymarket.com/markets?_c=weather" target="_blank">View on Polymarket ↗</a></div>`;
       }
     }
   }
 }
 
 function renderMarkets() {
-  const mc = document.getElementById('marketsContainer');
-  if (!polyMarkets.length) { mc.innerHTML = '<div style="font-size:13px;color:var(--text3);padding:12px 0;">No weather markets found.</div>'; return; }
-  mc.innerHTML = polyMarkets.map(m => {
-    const yesProb = m.outcomePrices ? Math.round(parseFloat(JSON.parse(m.outcomePrices)[0]) * 100) : null;
-    const noProb  = yesProb !== null ? 100 - yesProb : null;
-    const vol = m.volumeNum ? '$' + (m.volumeNum >= 1000 ? (m.volumeNum/1000).toFixed(1)+'k' : Math.round(m.volumeNum)) : '—';
-    const end = m.endDate ? new Date(m.endDate) : null;
-    const daysLeft = end ? Math.max(0, Math.round((end - Date.now()) / 86400000)) : null;
-    const yesCls = yesProb >= 60 ? 'badge-green' : yesProb >= 40 ? 'badge-amber' : 'badge-red';
-    const slug = m.slug || '';
-    return `<div class="mkt-row">
-      <div class="mkt-q"><a href="https://polymarket.com/event/${slug}" target="_blank" style="color:var(--text);">${m.question || 'Weather market'}</a></div>
-      <div class="mkt-meta">
-        ${yesProb !== null ? `<span class="badge ${yesCls}">YES ${yesProb}%</span><span class="badge badge-blue">NO ${noProb}%</span>` : ''}
-        <span style="font-size:11px;color:var(--text3);">Vol: ${vol}</span>
-        ${daysLeft !== null ? `<span style="font-size:11px;color:var(--text3);">Closes in ${daysLeft}d</span>` : ''}
-      </div>
+  const mc=document.getElementById('marketsContainer');
+  if(!polyMarkets.length){ mc.innerHTML='<div style="font-size:13px;color:var(--text3);padding:10px 0">No weather markets found.</div>'; return; }
+  mc.innerHTML=polyMarkets.map(m=>{
+    const yp=m.outcomePrices?Math.round(parseFloat(JSON.parse(m.outcomePrices)[0])*100):null;
+    const vol=m.volumeNum?'$'+(m.volumeNum>=1000?(m.volumeNum/1000).toFixed(1)+'k':Math.round(m.volumeNum)):'—';
+    const end=m.endDate?new Date(m.endDate):null;
+    const dl=end?Math.max(0,Math.round((end-Date.now())/86400000)):null;
+    const yc=yp>=60?'badge-green':yp>=40?'badge-amber':'badge-red';
+    return `<div class="mkt-row"><div class="mkt-q"><a href="https://polymarket.com/event/${m.slug||''}" target="_blank" style="color:var(--text)">${m.question||'Weather market'}</a></div><div class="mkt-meta">${yp!==null?`<span class="badge ${yc}">YES ${yp}%</span><span class="badge badge-blue">NO ${100-yp}%</span>`:''}<span style="font-size:11px;color:var(--text3)">Vol: ${vol}</span>${dl!==null?`<span style="font-size:11px;color:var(--text3)">Closes in ${dl}d</span>`:''}</div></div>`;
+  }).join('');
+
+  // Update microstructure with market data
+  updateMicrostructureFromMarkets();
+}
+
+// ═══════════════════════════════════════════════════════════════ STATION PROFILE
+function renderStationProfile() {
+  const p=STATION_PROFILES[city.icao];
+  if(!p){ document.getElementById('stationName').textContent=city.stationName; document.getElementById('stationCode').textContent=city.icao; return; }
+  document.getElementById('stationName').textContent=city.stationName;
+  document.getElementById('stationCode').textContent=city.icao;
+  document.getElementById('stationHeatLabel').textContent=city.stationName;
+  document.getElementById('heatPatternBadge').textContent=`Peak: ${Math.max(...p.heatPattern)}°C`;
+
+  const biasColor=p.bias>0?'var(--down)':p.bias<0?'var(--info)':'var(--text2)';
+  document.getElementById('traitBias').innerHTML=`<span style="color:${biasColor};font-weight:600">${p.bias>=0?'+':''}${p.bias}°C</span> <span style="font-size:11px;color:var(--text3)">${p.biasNote}</span>`;
+  document.getElementById('traitOvershoot').textContent=p.overshootFreq+' — '+p.overshootNote;
+  document.getElementById('traitMarine').textContent=p.marineSuppression+' — '+p.marineNote;
+  document.getElementById('traitRevision').textContent=p.revisionFreq+' — '+p.revisionNote;
+  document.getElementById('traitUHI').textContent=p.UHI+' — '+p.UIHNote;
+  document.getElementById('traitWind').textContent=p.windSuppression+' — '+p.windNote;
+
+  document.getElementById('resStation').textContent=p.resStation;
+  document.getElementById('resSource').textContent=p.resSource;
+  document.getElementById('resRounding').textContent=p.resRounding;
+  document.getElementById('resUpdateTime').textContent=p.updateTime;
+  document.getElementById('resRevFreq').textContent=p.revFreq;
+  document.getElementById('resDelta').innerHTML=`<span style="color:${p.bias>0?'var(--down)':'var(--info)'};font-weight:600">${p.stationDelta}</span>`;
+  document.getElementById('stationEdgeNote').textContent=p.edgeNote;
+
+  drawHeatingChart(p);
+}
+
+function drawHeatingChart(p) {
+  if(heatingChartObj){heatingChartObj.destroy();heatingChartObj=null;}
+  const ctx=document.getElementById('heatingChart').getContext('2d');
+  const isDark=matchMedia('(prefers-color-scheme:dark)').matches;
+  const tc=isDark?'rgba(255,255,255,.5)':'rgba(0,0,0,.45)';
+  const gc=isDark?'rgba(255,255,255,.07)':'rgba(0,0,0,.06)';
+  const hours=['6am','7am','8am','9am','10am','11am','12pm','1pm','2pm','3pm','4pm','5pm','6pm'];
+  heatingChartObj=new Chart(ctx,{
+    type:'line',
+    data:{labels:hours,datasets:[{label:'Typical heating profile',data:p.heatPattern,borderColor:'#1D9E75',backgroundColor:'rgba(29,158,117,0.12)',pointBackgroundColor:'#1D9E75',pointRadius:3,tension:.4,fill:true}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tc,font:{size:11}},grid:{display:false}},y:{ticks:{color:tc,font:{size:11},callback:v=>v+'°C'},grid:{color:gc}}}}
+  });
+  document.getElementById('heatingNote').textContent=p.heatNote;
+}
+
+// ═══════════════════════════════════════════════════════════════ INTRADAY ENGINE
+function renderIntraday() {
+  const h=intradayData.hourly;
+  const now=new Date();
+  const currentHour=now.getHours();
+  const profile=STATION_PROFILES[city.icao];
+
+  // Get today's hourly temps from Open-Meteo hourly data
+  const hourlyTemps=h.temperature_2m||[];
+  const hourlyHumidity=h.relativehumidity_2m||[];
+  const hourlyClouds=h.cloudcover||[];
+  const hourlyWind=h.windspeed_10m||[];
+
+  const currentTemp=hourlyTemps[currentHour]??liveTemps.gfs?.val??null;
+  const maxForecast=liveTemps.gfs?.val??null;
+
+  // Apply station bias
+  const bias=profile?.bias??0;
+  const adjMax=maxForecast?Math.round((maxForecast+bias)*10)/10:null;
+
+  const remaining=adjMax&&currentTemp?Math.round((adjMax-currentTemp)*10)/10:null;
+
+  document.getElementById('idCurrentTemp').textContent=currentTemp?currentTemp+'°C':'—';
+  document.getElementById('idExpectedMax').textContent=adjMax?adjMax+'°C (bias adj.)':'—';
+  document.getElementById('idRemaining').textContent=remaining!=null?(remaining>=0?'+':'')+remaining+'°C':'—';
+
+  // Momentum badge
+  const hoursLeft=Math.max(0,16-currentHour); // assume max heating done by 4pm
+  const heatingRate=currentHour>6&&hourlyTemps[currentHour]&&hourlyTemps[currentHour-2]?(hourlyTemps[currentHour]-hourlyTemps[currentHour-2])/2:null;
+
+  const mbText=heatingRate>0.8?'Heating fast':heatingRate>0.3?'Moderate heating':heatingRate!=null&&heatingRate<=0.3?'Heating stalled':'Calculating…';
+  const mbCls=heatingRate>0.8?'badge-green':heatingRate>0.3?'badge-amber':'badge-red';
+  document.getElementById('momentumBadge').textContent=mbText;
+  document.getElementById('momentumBadge').className='badge '+mbCls;
+
+  // Momentum factors
+  const humidity=hourlyHumidity[currentHour]??null;
+  const clouds=hourlyClouds[currentHour]??null;
+  const wind=hourlyWind[currentHour]??null;
+  const humidSuppression=humidity?humidity>75?'High (-1.5°C effect)':humidity>55?'Moderate (-0.8°C)':'Low (<0.3°C)':'—';
+  const cloudImpact=clouds?clouds>70?'Heavy (-2°C+)':clouds>40?'Partial (-0.8°C)':'Minimal':'—';
+  const windEffect=wind?wind>20?`Strong ${wind.toFixed(0)}km/h (-2°C)`:wind>10?`Moderate ${wind.toFixed(0)}km/h (-1°C)`:`Light ${wind.toFixed(0)}km/h`:'—';
+  const solarPct=Math.max(0,Math.round((1-(currentHour-6)/10)*100));
+  const decayEst=hoursLeft<2?'Near complete':hoursLeft<4?'Decelerating':'Still active';
+
+  document.getElementById('mfHeatingRate').textContent=heatingRate!=null?(heatingRate>=0?'+':'')+heatingRate.toFixed(1)+'°C/hr':'—';
+  document.getElementById('mfSolarAngle').textContent=solarPct+'% of peak heating window remaining';
+  document.getElementById('mfHumidity').textContent=humidSuppression;
+  document.getElementById('mfCloud').textContent=cloudImpact;
+  document.getElementById('mfWind').textContent=windEffect;
+  document.getElementById('mfDecay').textContent=decayEst;
+
+  // Scalping signal
+  let scalpTxt,scalpCls;
+  if(remaining!=null&&remaining<0.5&&hoursLeft<3){ scalpTxt='FADE YES — max nearly reached'; scalpCls='badge-red'; }
+  else if(heatingRate>0.8&&hoursLeft>3){ scalpTxt='BUY YES — momentum strong'; scalpCls='badge-green'; }
+  else if(heatingRate!=null&&heatingRate<0.2&&hoursLeft>2){ scalpTxt='SELL — heating stalled'; scalpCls='badge-amber'; }
+  else { scalpTxt='HOLD — monitor'; scalpCls='badge-blue'; }
+  document.getElementById('scalpBadge').textContent=scalpTxt;
+  document.getElementById('scalpBadge').className='badge '+scalpCls;
+  document.getElementById('scalpNote').textContent=`${hoursLeft}h of heating window left · ${remaining!=null?remaining+'°C remaining':'no remaining data'}`;
+
+  // Hour-by-hour remaining warming
+  const heatHoursEl=document.getElementById('heatHours');
+  if(hourlyTemps.length>0){
+    const futureHours=[];
+    for(let h2=currentHour;h2<=Math.min(currentHour+5,23);h2++) futureHours.push(h2);
+    heatHoursEl.innerHTML=`<div style="display:grid;grid-template-columns:repeat(${futureHours.length},1fr);gap:6px">
+    ${futureHours.map(hr=>{
+      const t=hourlyTemps[hr];
+      const d=t&&currentTemp?Math.round((t-currentTemp)*10)/10:null;
+      const dColor=d>0?'var(--up)':d<0?'var(--down)':'var(--text3)';
+      return `<div style="background:var(--surface2);border-radius:var(--radius-sm);padding:8px 4px;text-align:center">
+        <div style="font-size:10px;color:var(--text3)">${hr>12?hr-12+'pm':hr==12?'12pm':hr+'am'}</div>
+        <div style="font-size:15px;font-weight:700;margin:3px 0">${t?t+'°C':'—'}</div>
+        <div style="font-size:11px;font-weight:600;color:${dColor}">${d!=null?(d>=0?'+':'')+d:'—'}</div>
+      </div>`;
+    }).join('')}
+    </div>`;
+  } else {
+    heatHoursEl.innerHTML='<div style="color:var(--text3);font-size:13px">Hourly data loading…</div>';
+  }
+
+  drawIntradayChart(hourlyTemps, profile?.heatPattern, currentHour);
+}
+
+function drawIntradayChart(hourlyTemps, typicalPattern, currentHour) {
+  if(intradayChartObj){intradayChartObj.destroy();intradayChartObj=null;}
+  const ctx=document.getElementById('intradayChart').getContext('2d');
+  const isDark=matchMedia('(prefers-color-scheme:dark)').matches;
+  const tc=isDark?'rgba(255,255,255,.5)':'rgba(0,0,0,.45)';
+  const gc=isDark?'rgba(255,255,255,.07)':'rgba(0,0,0,.06)';
+  const hours=['6am','7am','8am','9am','10am','11am','12pm','1pm','2pm','3pm','4pm','5pm','6pm'];
+  const startHour=6;
+
+  // Today observed (only up to current hour)
+  const todayObs=hours.map((_,i)=>{
+    const h=i+startHour;
+    return h<=currentHour?(hourlyTemps[h]??null):null;
+  });
+  // Today forecast (from current hour onwards)
+  const todayForecast=hours.map((_,i)=>{
+    const h=i+startHour;
+    return h>=currentHour?(hourlyTemps[h]??null):null;
+  });
+  // Typical profile (station-adjusted)
+  const typical=typicalPattern||hours.map((_,i)=>{
+    const base=liveTemps.gfs?.val??20;
+    return Math.round((base-8+i*1.2)*10)/10;
+  });
+
+  document.getElementById('curveTimeBadge').textContent=`Now: ${currentHour>12?currentHour-12+'pm':currentHour==12?'12pm':currentHour+'am'}`;
+
+  intradayChartObj=new Chart(ctx,{
+    type:'line',
+    data:{labels:hours,datasets:[
+      {label:'Typical station profile',data:typical,borderColor:isDark?'rgba(255,255,255,.25)':'rgba(0,0,0,.2)',borderDash:[4,3],pointRadius:0,tension:.4,fill:false},
+      {label:'Today observed',data:todayObs,borderColor:'#1D9E75',backgroundColor:'rgba(29,158,117,0.08)',pointBackgroundColor:'#1D9E75',pointRadius:3,tension:.3,fill:true,spanGaps:false},
+      {label:'Model forecast',data:todayForecast,borderColor:'#185FA5',borderDash:[2,2],pointRadius:2,tension:.3,fill:false,spanGaps:false},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:tc,font:{size:11},boxWidth:20,padding:12}}},scales:{x:{ticks:{color:tc,font:{size:11}},grid:{display:false}},y:{ticks:{color:tc,font:{size:11},callback:v=>v+'°C'},grid:{color:gc}}}}
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════ MICROSTRUCTURE
+function updateMicrostructureFromMarkets() {
+  if(polyMarkets.length===0) return;
+  const m=polyMarkets[0];
+  const yp=m.outcomePrices?Math.round(parseFloat(JSON.parse(m.outcomePrices)[0])*100):null;
+  const vol=m.volumeNum??0;
+
+  document.getElementById('msLiquidity').textContent=vol>50000?'Deep ($50k+)':vol>10000?'Moderate ($10-50k)':'Thin (<$10k)';
+  document.getElementById('msSpread').textContent=yp?'~2-4¢ (est.)':'—';
+  document.getElementById('msVolume').textContent=vol?'$'+(vol>=1000?(vol/1000).toFixed(1)+'k':Math.round(vol)):'—';
+
+  const updatedAt=m.updatedAt?new Date(m.updatedAt):null;
+  const staleMins=updatedAt?Math.round((Date.now()-updatedAt)/60000):null;
+  document.getElementById('msStale').innerHTML=staleMins!=null?(staleMins>60?`<span style="color:var(--down);font-weight:600">${staleMins}min ago — possibly stale</span>`:`<span style="color:var(--up)">${staleMins}min ago — fresh</span>`):'—';
+
+  // Dummy whale / momentum (would need trade history endpoint)
+  document.getElementById('msWhale').textContent='No large trades detected (24h)';
+  document.getElementById('msMomentum').textContent=yp?'Stable (no spike)':'—';
+}
+
+function renderMicrostructure() {
+  updateMicrostructureFromMarkets();
+
+  // Build bin price inputs around consensus temp
+  const consensus=liveTemps.gfs?.val??20;
+  const binEl=document.getElementById('binInputs');
+  const base=Math.floor(consensus);
+  const bins=[base-1, base, base+1, base+2, base+3];
+
+  binEl.innerHTML=`<div style="font-size:12px;color:var(--text3);margin-bottom:6px">Enter YES prices (¢) for adjacent temperature bins:</div>
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px">
+  ${bins.map(b=>`
+    <div style="text-align:center">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:3px">${b}°C</div>
+      <input type="number" min="0" max="99" style="width:100%;font-size:13px;padding:5px;border-radius:var(--radius-sm);border:.5px solid var(--border2);background:var(--surface2);color:var(--text);text-align:center" 
+        id="bin_${b}" placeholder="—" oninput="checkArbOpportunity()">
+    </div>
+  `).join('')}
+  </div>`;
+
+  drawMicroChart([]);
+}
+
+function checkArbOpportunity() {
+  const consensus=liveTemps.gfs?.val??20;
+  const base=Math.floor(consensus);
+  const bins=[base-1, base, base+1, base+2, base+3];
+  const prices=bins.map(b=>{ const el=document.getElementById('bin_'+b); return el&&el.value?parseFloat(el.value):null; });
+  const valid=prices.filter(p=>p!==null);
+  if(valid.length<3){ document.getElementById('probAnalysis').textContent='Enter prices for at least 3 bins to detect arbitrage.'; return; }
+
+  // Check if probabilities form smooth decreasing curve (from peak)
+  const alerts=[];
+  let sumProb=valid.reduce((a,b)=>a+b,0);
+  if(sumProb>100) alerts.push(`Bin probabilities sum to ${sumProb.toFixed(0)}¢ (>${100}) — mathematical inconsistency`);
+
+  // Check for non-smooth transitions
+  for(let i=1;i<prices.length-1;i++){
+    if(prices[i]!==null&&prices[i-1]!==null&&prices[i+1]!==null){
+      if(prices[i]>prices[i-1]&&prices[i]>prices[i+1]){
+        // This is a local peak — check if adjacent bins are reasonably priced
+        const spread=prices[i]-Math.min(prices[i-1],prices[i+1]);
+        if(spread>15) alerts.push(`${bins[i]}°C bin priced ${spread.toFixed(0)}¢ above neighbors — possible opportunity`);
+      }
+    }
+  }
+
+  const arbAlert=document.getElementById('arbAlert');
+  const arbBadge=document.getElementById('arbBadge');
+  if(alerts.length>0){
+    arbAlert.style.display='block';
+    document.getElementById('arbAlertText').textContent=alerts.join(' · ');
+    arbBadge.textContent='⚡ Arb detected';
+    arbBadge.className='badge badge-amber';
+    document.getElementById('probAnalysis').textContent=`Detected ${alerts.length} pricing anomaly. Temperature bin probabilities should form a smooth bell curve centered near the forecast. Deviations are tradable edges.`;
+  } else {
+    arbAlert.style.display='none';
+    arbBadge.textContent='Pricing fair';
+    arbBadge.className='badge badge-green';
+    document.getElementById('probAnalysis').textContent='Bin prices appear reasonably smooth. No obvious arbitrage detected with current inputs.';
+  }
+
+  drawMicroChart(bins.map((b,i)=>({bin:b+'°C',price:prices[i]})).filter(x=>x.price!==null));
+}
+
+function drawMicroChart(data) {
+  if(microChartObj){microChartObj.destroy();microChartObj=null;}
+  const ctx=document.getElementById('microChart').getContext('2d');
+  const isDark=matchMedia('(prefers-color-scheme:dark)').matches;
+  const tc=isDark?'rgba(255,255,255,.5)':'rgba(0,0,0,.45)';
+  const gc=isDark?'rgba(255,255,255,.07)':'rgba(0,0,0,.06)';
+
+  if(data.length===0){
+    // Show example fair curve
+    const consensus=liveTemps.gfs?.val??20;
+    const base=Math.floor(consensus);
+    const bins=[base-2,base-1,base,base+1,base+2,base+3];
+    const fairCurve=bins.map(b=>Math.round(Math.max(1,40*Math.exp(-0.5*Math.pow((b-base)/1.2,2)))));
+    microChartObj=new Chart(ctx,{type:'bar',data:{labels:bins.map(b=>b+'°C'),datasets:[{label:'Fair value (example)',data:fairCurve,backgroundColor:'rgba(29,158,117,0.3)',borderColor:'#1D9E75',borderWidth:1,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.raw+'¢'}}},scales:{x:{ticks:{color:tc,font:{size:11}},grid:{display:false}},y:{ticks:{color:tc,font:{size:11},callback:v=>v+'¢'},grid:{color:gc},title:{display:true,text:'YES price (¢)',color:tc,font:{size:11}}}}}});
+    return;
+  }
+
+  // Show actual vs fair
+  const center=data.reduce((a,b)=>a.price>b.price?a:b).bin;
+  microChartObj=new Chart(ctx,{type:'bar',data:{labels:data.map(d=>d.bin),datasets:[{label:'Market prices',data:data.map(d=>d.price),backgroundColor:data.map(d=>d.price>40?'#A32D2D':'#185FA5'),borderRadius:4,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.raw+'¢'}}},scales:{x:{ticks:{color:tc,font:{size:11}},grid:{display:false}},y:{ticks:{color:tc,font:{size:11},callback:v=>v+'¢'},grid:{color:gc}}}}});
+}
+
+// ═══════════════════════════════════════════════════════════════ VELOCITY
+function renderVelocity() {
+  const isDark=matchMedia('(prefers-color-scheme:dark)').matches;
+  const tc=isDark?'rgba(255,255,255,.5)':'rgba(0,0,0,.45)';
+  const gc=isDark?'rgba(255,255,255,.07)':'rgba(0,0,0,.06)';
+
+  const snaps=forecastSnapshots;
+
+  if(snaps.length<2){
+    document.getElementById('velocityRows').innerHTML='<div style="color:var(--text3);font-size:13px;padding:8px 0">Need 2+ snapshots — refreshing builds velocity history. Check back after next auto-refresh.</div>';
+    document.getElementById('velRate').textContent='—';
+    document.getElementById('velAccel').textContent='—';
+    document.getElementById('velConf').textContent='—';
+    document.getElementById('velBadge').textContent='Collecting data…';
+    document.getElementById('velBadge').className='badge badge-neutral';
+    // Seed with simulated data for demo
+    seedVelocityData();
+    return;
+  }
+
+  renderVelocityRows(snaps);
+  computeVelocityMetrics(snaps);
+  drawVelocityChart(snaps);
+}
+
+function seedVelocityData() {
+  // Create simulated intraday forecast revisions for demo
+  const base=liveTemps.gfs?.val??20;
+  const now=new Date();
+  const simSnaps=[];
+  for(let i=5;i>=0;i--){
+    const t=new Date(now-i*3600000);
+    const drift=(5-i)*0.15+(Math.random()-0.4)*0.2;
+    simSnaps.push({time:t, temp:Math.round((base-0.5+drift)*10)/10, simulated:true});
+  }
+  forecastSnapshots=simSnaps;
+  renderVelocityRows(simSnaps);
+  computeVelocityMetrics(simSnaps);
+  drawVelocityChart(simSnaps);
+}
+
+function renderVelocityRows(snaps) {
+  const rowsEl=document.getElementById('velocityRows');
+  rowsEl.innerHTML=snaps.slice(-6).reverse().map((s,i,arr)=>{
+    const prev=arr[i+1];
+    const delta=prev?Math.round((s.temp-prev.temp)*10)/10:null;
+    const dColor=delta>0?'var(--up)':delta<0?'var(--down)':'var(--text3)';
+    const timeStr=s.time.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    return `<div class="vel-row">
+      <span class="vel-time">${timeStr}</span>
+      <span class="vel-temp">${s.temp}°C${s.simulated?' <span style="font-size:10px;color:var(--text3)">(est)</span>':''}</span>
+      <span class="vel-delta" style="color:${dColor}">${delta!=null?(delta>=0?'▲ +':'▼ ')+Math.abs(delta)+'°C/hr':'—'}</span>
     </div>`;
   }).join('');
 }
 
-// ─── Edge calculator ──────────────────────────────────────────────────────────
-function calcEdge() {
-  const my = parseInt(document.getElementById('myProb').value);
-  const mkt = parseInt(document.getElementById('mktProb').value);
-  const stake = parseInt(document.getElementById('stake').value);
-  document.getElementById('myProbVal').textContent = my + '%';
-  document.getElementById('mktProbVal').textContent = mkt + '¢';
-  document.getElementById('stakeVal').textContent = '$' + stake;
+function computeVelocityMetrics(snaps) {
+  if(snaps.length<2) return;
+  const recent=snaps.slice(-3);
+  const first=recent[0], last=recent[recent.length-1];
+  const hrs=(last.time-first.time)/3600000||1;
+  const vel=Math.round((last.temp-first.temp)/hrs*10)/10;
+  const isRevising=Math.abs(vel)>0.1;
+  const direction=vel>0.3?'Upward revision':vel<-0.3?'Downward revision':'Stable';
+  const lag=Math.abs(vel)>0.5?'High — market likely lagging':'Low — market probably priced in';
+  const convergence=snaps.length>4&&Math.abs(vel)<0.2?'Yes — converging':'Still revising';
+  const locked=Math.abs(vel)<0.1&&snaps.length>3?'Yes':'No';
 
-  const p = my / 100;
-  const price = mkt / 100;
-  const b = (1 / price) - 1;
-  const q = 1 - p;
-  const edge = my - mkt;
-  const ev = stake * (p * b - q);
-  const kelly = Math.max(0, Math.round(((p * b - q) / b) * 100));
+  document.getElementById('velRate').textContent=(vel>=0?'+':'')+vel;
+  const accel=snaps.length>3?Math.round((snaps[snaps.length-1].temp-snaps[snaps.length-2].temp-(snaps[snaps.length-2].temp-snaps[snaps.length-3].temp))*10)/10:null;
+  document.getElementById('velAccel').textContent=accel!=null?(accel>0?'↑ Accel':accel<0?'↓ Decel':'→ Flat'):'—';
+  document.getElementById('velConf').textContent=convergence==='Yes — converging'?'↓ Conv':'↑ Div';
 
-  document.getElementById('edgeVal').textContent = (edge >= 0 ? '+' : '') + edge + '%';
-  document.getElementById('edgeVal').style.color = edge > 5 ? 'var(--up)' : edge > 0 ? 'var(--warn)' : 'var(--down)';
-  document.getElementById('evVal').textContent = (ev >= 0 ? '+' : '') + '$' + Math.abs(ev).toFixed(2);
-  document.getElementById('evVal').style.color = ev > 0 ? 'var(--up)' : 'var(--down)';
-  document.getElementById('kellyVal').textContent = kelly + '%';
-  document.getElementById('edgeBar').style.width = Math.min(100, Math.abs(edge) * 2) + '%';
-  document.getElementById('edgeBar').style.background = edge > 0 ? 'var(--accent)' : 'var(--down)';
+  const badgeText=Math.abs(vel)>0.5?'Fast revision — check lag':Math.abs(vel)>0.2?'Moderate revision':Math.abs(vel)<0.05?'Forecast locked':'Slow drift';
+  const badgeCls=Math.abs(vel)>0.5?'badge-red':Math.abs(vel)>0.2?'badge-amber':'badge-green';
+  document.getElementById('velBadge').textContent=badgeText;
+  document.getElementById('velBadge').className='badge '+badgeCls;
 
-  let signal, sigCls, note;
-  if (edge > 15)      { signal='BUY YES — Strong edge';   sigCls='badge-green';  note=`Your prob ${edge}pts above market`; }
-  else if (edge > 5)  { signal='BUY YES — Moderate edge'; sigCls='badge-amber';  note=`Your prob ${edge}pts above market`; }
-  else if (edge > -5) { signal='PASS — Thin or no edge';  sigCls='badge-neutral';note=`Only ${Math.abs(edge)}pt difference`; }
-  else if (edge > -15){ signal='BUY NO — Moderate edge';  sigCls='badge-amber';  note=`Market overpriced by ${Math.abs(edge)}pts`; }
-  else                { signal='BUY NO — Strong edge';    sigCls='badge-green';  note=`Market overpriced by ${Math.abs(edge)}pts`; }
-  document.getElementById('signalBadge').textContent = signal;
-  document.getElementById('signalBadge').className = 'badge ' + sigCls;
-  document.getElementById('signalBadge').style.cssText = 'font-size:12px;padding:4px 14px;';
-  document.getElementById('signalNote').textContent = note;
+  document.getElementById('vsDirection').textContent=direction;
+  document.getElementById('vsLag').innerHTML=`<span style="color:${Math.abs(vel)>0.5?'var(--up)':'var(--text3)'};font-weight:600">${lag}</span>`;
+  document.getElementById('vsConvergence').textContent=convergence;
+  document.getElementById('vsLocked').textContent=locked;
+  document.getElementById('vsAlert').textContent=Math.abs(vel)>0.5?'⚡ Alert: fast revision in progress':'None — watching';
+
+  let actionText,actionCls,actionNote;
+  if(vel>0.5){ actionText='BUY YES — fast upward revision'; actionCls='badge-green'; actionNote='Market may not have priced in '+vel+'°C/hr upward trend yet'; }
+  else if(vel<-0.5){ actionText='BUY NO — fast downward revision'; actionCls='badge-red'; actionNote='Downward revision accelerating — YES holders at risk'; }
+  else if(convergence.includes('converging')){ actionText='HOLD — forecast locking in'; actionCls='badge-blue'; actionNote='Revisions slowing, price should stabilize'; }
+  else { actionText='MONITOR — slow drift'; actionCls='badge-neutral'; actionNote='No strong velocity signal right now'; }
+  document.getElementById('velActionBadge').textContent=actionText;
+  document.getElementById('velActionBadge').className='badge '+actionCls;
+  document.getElementById('velActionBadge').style.cssText='font-size:12px;padding:4px 12px';
+  document.getElementById('velActionNote').textContent=actionNote;
 }
 
-// ─── AI analyst ───────────────────────────────────────────────────────────────
-function quickPrompt(t) { document.getElementById('aiInput').value = t; runAI(); }
+function drawVelocityChart(snaps) {
+  if(velocityChartObj){velocityChartObj.destroy();velocityChartObj=null;}
+  const ctx=document.getElementById('velocityChart').getContext('2d');
+  const isDark=matchMedia('(prefers-color-scheme:dark)').matches;
+  const tc=isDark?'rgba(255,255,255,.5)':'rgba(0,0,0,.45)';
+  const gc=isDark?'rgba(255,255,255,.07)':'rgba(0,0,0,.06)';
+  const labels=snaps.map(s=>s.time.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}));
+  const data=snaps.map(s=>s.temp);
+  velocityChartObj=new Chart(ctx,{type:'line',data:{labels,datasets:[{label:'Forecast trajectory',data,borderColor:'#1D9E75',backgroundColor:'rgba(29,158,117,0.08)',pointBackgroundColor:snaps.map(s=>s.simulated?'rgba(29,158,117,0.5)':'#1D9E75'),pointRadius:4,tension:.2,fill:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tc,font:{size:11}},grid:{display:false}},y:{ticks:{color:tc,font:{size:11},callback:v=>v+'°C'},grid:{color:gc}}}}});
+}
+
+// ═══════════════════════════════════════════════════════════════ EDGE CALC
+function calcEdge() {
+  const my=parseInt(document.getElementById('myProb').value);
+  const mkt=parseInt(document.getElementById('mktProb').value);
+  const stake=parseInt(document.getElementById('stake').value);
+  document.getElementById('myProbVal').textContent=my+'%';
+  document.getElementById('mktProbVal').textContent=mkt+'¢';
+  document.getElementById('stakeVal').textContent='$'+stake;
+  const p=my/100, price=mkt/100, b=(1/price)-1, q=1-p;
+  const edge=my-mkt, ev=stake*(p*b-q), kelly=Math.max(0,Math.round(((p*b-q)/b)*100));
+  document.getElementById('edgeVal').textContent=(edge>=0?'+':'')+edge+'%';
+  document.getElementById('edgeVal').style.color=edge>5?'var(--up)':edge>0?'var(--warn)':'var(--down)';
+  document.getElementById('evVal').textContent=(ev>=0?'+':'')+ev.toFixed(2).replace(/^-/,'-$').replace(/^\+?/,ev>=0?'$':'');
+  document.getElementById('evVal').textContent=(ev>=0?'+$':'-$')+Math.abs(ev).toFixed(2);
+  document.getElementById('evVal').style.color=ev>0?'var(--up)':'var(--down)';
+  document.getElementById('kellyVal').textContent=kelly+'%';
+  document.getElementById('edgeBar').style.width=Math.min(100,Math.abs(edge)*2)+'%';
+  document.getElementById('edgeBar').style.background=edge>0?'var(--accent)':'var(--down)';
+  let signal,sigCls,note;
+  if(edge>15){signal='BUY YES — Strong edge';sigCls='badge-green';note=`Your prob ${edge}pts above market`;}
+  else if(edge>5){signal='BUY YES — Moderate edge';sigCls='badge-amber';note=`Your prob ${edge}pts above market`;}
+  else if(edge>-5){signal='PASS — Thin or no edge';sigCls='badge-neutral';note=`Only ${Math.abs(edge)}pt difference`;}
+  else if(edge>-15){signal='BUY NO — Moderate edge';sigCls='badge-amber';note=`Market overpriced by ${Math.abs(edge)}pts`;}
+  else{signal='BUY NO — Strong edge';sigCls='badge-green';note=`Market overpriced by ${Math.abs(edge)}pts`;}
+  document.getElementById('signalBadge').textContent=signal;
+  document.getElementById('signalBadge').className='badge '+sigCls;
+  document.getElementById('signalBadge').style.cssText='font-size:12px;padding:4px 12px';
+  document.getElementById('signalNote').textContent=note;
+}
+
+// ═══════════════════════════════════════════════════════════════ AI ANALYST
+function quickPrompt(t){document.getElementById('aiInput').value=t;runAI();}
 
 async function runAI() {
-  const input = document.getElementById('aiInput').value.trim();
-  if (!input) return;
-  const keys = getKeys();
-  if (!keys.anthropic) {
-    document.getElementById('aiBox').style.fontStyle = 'normal';
-    document.getElementById('aiBox').textContent = '⚠ Add your Anthropic API key in Settings to use AI analysis.';
-    openSettings();
-    return;
-  }
+  const input=document.getElementById('aiInput').value.trim();
+  if(!input) return;
+  const keys=getKeys();
+  if(!keys.anthropic){ document.getElementById('aiBox').textContent='⚠ Add your Anthropic API key in Settings to use AI analysis.'; openSettings(); return; }
 
-  const srcSummary = Object.entries(liveTemps)
-    .filter(([,v]) => v.status === 'ok')
-    .map(([k,v]) => `${k.toUpperCase()}: ${v.val}°C`).join(', ');
+  const profile=STATION_PROFILES[city.icao];
+  const vals=Object.values(liveTemps).filter(t=>t.status==='ok').map(t=>t.val);
+  const avg=vals.length?Math.round(vals.reduce((a,b)=>a+b,0)/vals.length*10)/10:null;
+  const spread=vals.length?Math.round((Math.max(...vals)-Math.min(...vals))*10)/10:null;
+  const now=new Date();
+  const currentHour=now.getHours();
+  const hourlyTemps=intradayData.hourly?.temperature_2m??[];
+  const currentTemp=hourlyTemps[currentHour]??avg;
+  const snaps=forecastSnapshots;
+  const vel=snaps.length>2?Math.round((snaps[snaps.length-1].temp-(snaps[0].temp))/(snaps.length-1)*10)/10:null;
 
-  const now = new Date();
-  const month = MONTHS[now.getMonth()];
-  const my = document.getElementById('myProb').value;
-  const mkt = document.getElementById('mktProb').value;
-  const stake = document.getElementById('stake').value;
+  const context=`You are a sharp, concise quantitative weather market trading analyst. The user trades on Polymarket weather markets. All temperatures in Celsius.
 
-  const context = `You are a concise, sharp weather market trading analyst. The user trades on Polymarket weather markets.
+LIVE DATA:
+- City: ${city.name} | Station: ${city.stationName} (${city.icao})
+- Month: ${MONTHS[now.getMonth()]} | Hour: ${currentHour}:00
+- Live sources: ${vals.length?vals.join(', ')+'°C ('+vals.length+' models)':'loading'}
+- Model consensus: ${avg??'—'}°C | Spread: ±${spread??'—'}°C
+- Current temp (hourly): ${currentTemp??'—'}°C
+- 10yr historical avg: ${histData.records.avg??'—'}°C | Record low: ${histData.records.min??'—'}°C | Record high: ${histData.records.max??'—'}°C
 
-LIVE DASHBOARD DATA:
-- City: ${city.name} (${city.lat}, ${city.lon})
-- Month: ${month}
-- Live temp sources: ${srcSummary || 'loading…'}
-- 10yr historical avg (${month}): ${histData.records.avg ?? '—'}°C
-- 10yr record low: ${histData.records.min ?? '—'}°C
-- 10yr record high: ${histData.records.max ?? '—'}°C
-- Edge calculator: user's YES prob = ${my}%, market price = ${mkt}¢, stake = $${stake}
-- Active markets: ${polyMarkets.slice(0,4).map(m=>m.question).join(' | ') || 'none loaded'}
+STATION PROFILE (${city.icao}):
+- Systematic bias: ${profile?.bias>=0?'+':''}${profile?.bias??'unknown'}°C vs model consensus
+- Afternoon overshoot: ${profile?.overshootFreq??'unknown'} of days
+- Marine suppression: ${profile?.marineSuppression??'unknown'}
+- Resolution source: ${profile?.resStation??'unknown'} | Rounding: ${profile?.resRounding??'unknown'}
+- Station edge: ${profile?.edgeNote??'none'}
 
-Be practical and direct. 2-5 sentences. No markdown headers. Reference specific numbers from the data when relevant.`;
+INTRADAY MOMENTUM:
+- Hours until typical max: ${Math.max(0,15-currentHour)}h remaining
+- Heating still active: ${currentHour<15?'Yes':'Likely complete'}
+- Forecast velocity: ${vel!=null?(vel>=0?'+':'')+vel+'°C/hr':'insufficient data'}
 
-  const aiBox = document.getElementById('aiBox');
-  aiBox.style.fontStyle = 'italic';
-  aiBox.style.color = 'var(--text3)';
-  aiBox.textContent = 'Analyzing your setup…';
+EDGE CALC: My prob=${document.getElementById('myProb').value}%, Market=${document.getElementById('mktProb').value}¢, Stake=$${document.getElementById('stake').value}
 
+ACTIVE MARKETS: ${polyMarkets.slice(0,3).map(m=>m.question).join(' | ')||'none loaded'}
+
+Be direct and practical. Reference specific numbers. 3-5 sentences max. No markdown headers.`;
+
+  const aiBox=document.getElementById('aiBox');
+  aiBox.style.fontStyle='italic'; aiBox.style.color='var(--text3)';
+  aiBox.textContent='Analyzing with full dashboard context…';
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': keys.anthropic,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: context,
-        messages: [{ role: 'user', content: input }]
-      })
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':keys.anthropic,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:context,messages:[{role:'user',content:input}]})
     });
-    const data = await res.json();
-    if (data.error) throw new Error(data.error.message);
-    const text = data.content?.map(b => b.text||'').join('') || 'No response.';
-    aiBox.style.fontStyle = 'normal';
-    aiBox.style.color = 'var(--text)';
-    aiBox.textContent = text;
-  } catch(e) {
-    aiBox.style.fontStyle = 'normal';
-    aiBox.style.color = 'var(--down)';
-    aiBox.textContent = 'Error: ' + e.message;
-  }
+    const data=await res.json();
+    if(data.error) throw new Error(data.error.message);
+    const text=data.content?.map(b=>b.text||'').join('')||'No response.';
+    aiBox.style.fontStyle='normal'; aiBox.style.color='var(--text)';
+    aiBox.textContent=text;
+  } catch(e){ aiBox.style.fontStyle='normal'; aiBox.style.color='var(--down)'; aiBox.textContent='Error: '+e.message; }
 }
 
-// ─── Main refresh ─────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════ MAIN
 async function refreshAll() {
-  setStatus('Loading live data…', false);
-  document.getElementById('statConsensus').textContent = '—';
-  document.getElementById('statHistAvg').textContent = '—';
-  document.getElementById('statPercentile').textContent = '—';
-  document.getElementById('statSpread').textContent = '—';
-  liveTemps = {};
-  histData = { monthly:[], trend:[], records:{} };
-
-  await Promise.all([
-    loadTemperatures(),
-    loadPolymarkets()
-  ]);
-
-  // Historical loads after temps start populating
-  setTimeout(() => loadHistoricalData(), 1000);
-
-  setStatus('Live · updated ' + new Date().toLocaleTimeString(), true);
+  setStatus('Loading live data…',false);
+  liveTemps={}; histData={monthly:[],trend:[],records:{}};
+  await Promise.all([loadTemperatures(), loadPolymarkets()]);
+  setTimeout(()=>loadHistoricalData(),1200);
+  setStatus('Live · updated '+new Date().toLocaleTimeString(),true);
 }
 
-// ─── Init ─────────────────────────────────────────────────────────────────────
 calcEdge();
 refreshAll();
-// Auto-refresh every 10 minutes
-setInterval(refreshAll, 10 * 60 * 1000);
+setInterval(refreshAll,10*60*1000); // auto-refresh every 10 min
+setInterval(()=>{ // seed velocity snapshots every 5min
+  const vals=Object.values(liveTemps).filter(t=>t.status==='ok').map(t=>t.val);
+  if(vals.length>0){
+    const avg=Math.round(vals.reduce((a,b)=>a+b,0)/vals.length*10)/10;
+    forecastSnapshots.push({time:new Date(),temp:avg});
+    if(forecastSnapshots.length>12) forecastSnapshots.shift();
+  }
+},5*60*1000);
 </script>
 </body>
 </html>
